@@ -1,17 +1,14 @@
-import collections
 import sympy
 import functools
 import sys
-from copy import deepcopy
 import itertools
 import math
+from graph_helper import Nodes, Edges, graph_helper
 sys.setrecursionlimit(10000)
 
 # u = {0, 1, 2, ..., u_count - 1}
 # v = {0, 1, 2, ..., v_count - 1}
 # and edges = [ (ui, vj), ... ]
-Edges = list[tuple[int, int]]
-Nodes = list[int]
 
 
 class Graph:
@@ -26,9 +23,6 @@ class Graph:
                 self.U.append(u)
             if v not in self.V:
                 self.V.append(v)
-
-    def opt(self) -> int:
-        ...
 
     def expected_success(self):
         if len(self.V) == 0:
@@ -73,8 +67,36 @@ def G(n: int) -> Graph:
 
 
 def main():
-    g = G(3)
+    g = G(1)
     print(g.expected_success())
+    g = Graph([
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (0, 1),
+        (1, 1),
+        (2, 1),
+        (3, 1),
+        (2, 2),
+        (3, 2),
+        (3, 3)
+    ])
+    
+    g = Graph([
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (0, 1),
+        (1, 1),
+        (2, 1),
+        (3, 1),
+        (2, 2),
+        (3, 2),
+        (2, 3),
+        (3, 3)
+    ])
 
 
 if __name__ == "__main__":
