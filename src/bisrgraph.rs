@@ -12,6 +12,7 @@ type Weight = f64;
 pub(crate) struct BiSRGraph {
     u: Index,
     v_lambda: Vec<Weight>,
+    #[allow(dead_code)]
     u_adj: Vec<Vec<Index>>,
     v_adj: Vec<Vec<Index>>,
 }
@@ -31,11 +32,11 @@ impl BiSRGraph {
 
         let mut v_lambda = Vec::new();
 
-        for edge in edges {
+        for edge in edges.iter() {
             let (u, v) = edge;
             let ui;
             let vi;
-            match u_key2i.get(&u) {
+            match u_key2i.get(u) {
                 Some(&i) => ui = i,
                 None => {
                     ui = u_key.len();
@@ -45,7 +46,7 @@ impl BiSRGraph {
                 }
             }
 
-            match v_key2i.get(&v) {
+            match v_key2i.get(v) {
                 Some(&i) => vi = i,
                 None => {
                     vi = v_key.len();
@@ -54,9 +55,9 @@ impl BiSRGraph {
                     v_adj.push(Vec::new());
 
                     assert_eq!(
-                        v_weight[vi].0, v,
+                        v_weight[vi].0, *v,
                         "the edges' order don't follow the v weight sequence, v_weight = {}, v = {}",
-                        v_weight[vi].0, v
+                        v_weight[vi].0, *v
                     );
                     v_lambda.push(v_weight[vi].1);
                 }
@@ -74,7 +75,6 @@ impl BiSRGraph {
         for adj in v_adj.iter_mut() {
             adj.sort()
         }
-        assert_eq!(v_weight.len(), v_key.len(), "not exactly the same edges");
 
         BiSRGraph {
             u: u_key.len(),
@@ -87,6 +87,7 @@ impl BiSRGraph {
 
 impl BiSRGraph {
     #[allow(non_snake_case)]
+    #[allow(dead_code)]
     pub fn OPT(self: &Self) -> f64 {
         todo!()
     }
