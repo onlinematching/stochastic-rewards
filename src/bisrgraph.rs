@@ -18,7 +18,7 @@ pub(crate) struct BiSRGraph {
 }
 
 impl BiSRGraph {
-    pub fn from_edge<Key>(edges: Vec<(Key, Key)>, v_weight: Vec<(Key, Weight)>) -> Self
+    pub fn from_edge<Key>(edges: Vec<(Key, Key)>, v_weight: HashMap<Key, Weight>) -> Self
     where
         Key: Hash + std::cmp::Eq + Clone + std::fmt::Debug + std::fmt::Display,
     {
@@ -54,12 +54,7 @@ impl BiSRGraph {
                     v_key2i.insert(v.clone(), vi);
                     v_adj.push(Vec::new());
 
-                    assert_eq!(
-                        v_weight[vi].0, *v,
-                        "the edges' order don't follow the v weight sequence, v_weight = {}, v = {}",
-                        v_weight[vi].0, *v
-                    );
-                    v_lambda.push(v_weight[vi].1);
+                    v_lambda.push(v_weight[v]);
                 }
             }
             assert!(!u_adj[ui].contains(&vi), "diagnostic repeated edges");
@@ -103,14 +98,14 @@ impl BiSRGraph {
         let n = v0_adj.len();
         let distribution = expected_success_distribution(n, lambda);
         let mut exps = 0.;
-        for k in 0..n + 1 {
+        for k in 0..=n {
             exps += k as f64 * distribution[k];
             let pk = distribution[k] / binomial(n, k) as f64;
             for it in v0_adj.clone().into_iter().combinations(k) {
                 let mut edges = vec![];
-                let mut v_weight = vec![];
+                let mut v_weight = HashMap::new();
                 for vi in 1..self.v_adj.len() {
-                    v_weight.push((vi, self.v_lambda[vi]));
+                    v_weight.insert(vi, self.v_lambda[vi]);
                     for &ui in &self.v_adj[vi] {
                         if !it.contains(&ui) {
                             edges.push((ui, vi));
