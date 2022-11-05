@@ -1,6 +1,6 @@
 mod bisrgraph;
-mod util;
 mod test;
+mod util;
 
 fn main() {
     use crate::util::expected_success_distribution;

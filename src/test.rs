@@ -30,12 +30,7 @@ mod tests {
 
     #[test]
     fn test2() {
-        let edges = vec![
-            ("A", "a"),
-            ("B", "a"),
-            ("A", "b"),
-            ("B", "b"),
-        ];
+        let edges = vec![("A", "a"), ("B", "a"), ("A", "b"), ("B", "b")];
         let v_weight = vec![("a", 0.5), ("b", 0.5)];
         let g = BiSRGraph::from_edge(edges, v_weight);
         println!("{:?}", g);
@@ -45,10 +40,7 @@ mod tests {
 
     #[test]
     fn test3() {
-        let edges = vec![
-            ("A", "a"),
-            ("A", "b"),
-        ];
+        let edges = vec![("A", "a"), ("A", "b")];
         let v_weight = vec![("a", 0.5), ("b", 0.5)];
         let g = BiSRGraph::from_edge(edges, v_weight);
         println!("{:?}", g);
@@ -57,10 +49,7 @@ mod tests {
 
     #[test]
     fn test4() {
-        let edges = vec![
-            ("A", "a"),
-            ("B", "a"),
-        ];
+        let edges = vec![("A", "a"), ("B", "a")];
         let v_weight = vec![("a", 2.0)];
         let g = BiSRGraph::from_edge(edges, v_weight);
         println!("{:?}", g);
@@ -82,21 +71,46 @@ mod tests {
             ("D", "d"),
         ];
         let v_weight = vec![
-            ("a", 1.),
-            ("b", 1.01),
-            ("c", 0.99),
-            ("d", 1.0),
+            ("a", 0.51), 
+            ("b", 1.00), 
+            ("c", 1.00), 
+            ("d", 1.00)
         ];
+        let mut opt = 0.;
+        for (_, o) in &v_weight {
+            opt += o;
+        }
         let g = BiSRGraph::from_edge(edges, v_weight);
+
         println!("{:?}", g);
 
-        println!("{:?}", g.ALG() / 4.);
+        println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
     }
 
 
     #[test]
+    fn test6() {
+        let n = 7;
+        let mut edges = vec![];
+        for v in 0..n {
+            for u in v..n {
+                edges.push((u, v));
+            }
+        }
+        let mut v_weight = vec![];
+        for v in 0..n {
+            v_weight.push((v, 1.0))
+        }
+        let g = BiSRGraph::from_edge(edges, v_weight);
+
+        println!("{:?}", g);
+
+        println!("opt = {:?}, ALG = {:?}", n, g.ALG() / n as f64);
+    }
+
+    #[test]
     fn test_util() {
-        println!("{:?}", expected_success_distribution(2,1.));
+        println!("{:?}", expected_success_distribution(2, 1.));
         println!("Hello, world!");
     }
 }
