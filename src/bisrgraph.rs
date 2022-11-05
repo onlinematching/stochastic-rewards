@@ -1,7 +1,6 @@
 use num::integer::binomial;
 
 use crate::util::expected_success_distribution;
-use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::vec;
@@ -62,8 +61,10 @@ impl BiSRGraph {
                     v_lambda.push(v_weight[vi].1);
                 }
             }
-
+            assert!(!u_adj[ui].contains(&vi), "diagnostic repeated edges");
             u_adj[ui].push(vi);
+
+            assert!(!v_adj[vi].contains(&ui), "diagnostic repeated edges");
             v_adj[vi].push(ui);
         }
 
@@ -73,6 +74,7 @@ impl BiSRGraph {
         for adj in v_adj.iter_mut() {
             adj.sort()
         }
+        assert_eq!(v_weight.len(), v_key.len(), "not exactly the same edges");
 
         BiSRGraph {
             u: u_key.len(),
@@ -100,7 +102,7 @@ impl BiSRGraph {
         let n = v0_adj.len();
         let distribution = expected_success_distribution(n, lambda);
         let mut exps = 0.;
-        for k in 0..n+1{
+        for k in 0..n + 1 {
             exps += k as f64 * distribution[k];
             let pk = distribution[k] / binomial(n, k) as f64;
             for it in v0_adj.clone().into_iter().combinations(k) {
