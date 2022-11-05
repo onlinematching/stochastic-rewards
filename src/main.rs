@@ -12,11 +12,13 @@ fn main() {
         ("C", "b"),
         ("C", "c"),
     ];
-    let v_weight = vec![("a", 1.), ("b", 0.9), ("c", 0.95)];
+    let v_weight = vec![("a", 1.), ("b", 1.1), ("c", 0.9)];
     let g = BiSRGraph::from_edge(edges, v_weight);
     println!("{:?}", g);
 
-    println!("{:?}", expected_success_distribution(15,1.));
+    println!("{:?}", expected_success_distribution(4,1.));
+
+    println!("{:?}", g.ALG() / 3.);
 
     println!("Hello, world!");
 }

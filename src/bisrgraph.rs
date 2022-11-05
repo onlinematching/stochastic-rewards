@@ -1,5 +1,10 @@
+use num::integer::binomial;
+
+use crate::util::expected_success_distribution;
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::vec;
 
 type Index = usize;
 type Weight = f64;
@@ -75,5 +80,44 @@ impl BiSRGraph {
             u_adj,
             v_adj,
         }
+    }
+}
+
+impl BiSRGraph {
+    #[allow(non_snake_case)]
+    pub fn OPT(self: &Self) -> f64 {
+        todo!()
+    }
+
+    #[allow(non_snake_case)]
+    pub fn ALG(self: &Self) -> f64 {
+        use itertools::Itertools;
+        if self.u == 0 {
+            return 0.0;
+        }
+        let v0_adj = &self.v_adj[0];
+        let lambda = self.v_lambda[0];
+        let n = v0_adj.len();
+        let distribution = expected_success_distribution(n, lambda);
+        let mut exps = 0.;
+        for k in 0..n+1{
+            exps += k as f64 * distribution[k];
+            let pk = distribution[k] / binomial(n, k) as f64;
+            for it in v0_adj.clone().into_iter().combinations(k) {
+                let mut edges = vec![];
+                let mut v_weight = vec![];
+                for vi in 1..self.v_adj.len() {
+                    v_weight.push((vi, self.v_lambda[vi]));
+                    for &ui in &self.v_adj[vi] {
+                        if !it.contains(&ui) {
+                            edges.push((ui, vi));
+                        }
+                    }
+                }
+                let next_graph = Self::from_edge(edges, v_weight);
+                exps += pk * next_graph.ALG();
+            }
+        }
+        exps
     }
 }
