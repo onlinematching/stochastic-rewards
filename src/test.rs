@@ -147,6 +147,41 @@ mod tests {
         println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
     }
 
+
+    #[test]
+    fn test8() {
+        let edges = vec![
+            ("A", "a"),
+            ("B", "a"),
+            ("C", "a"),
+            ("D", "a"),
+            ("E", "a"),
+            ("B", "b"),
+            ("C", "b"),
+            ("C", "c"),
+            ("D", "d"),
+            ("E", "d"),
+            ("E", "e"),
+        ];
+        let v_weight = HashMap::from([
+            ("a", 1.00),
+            ("b", 1.00),
+            ("c", 1.00),
+            ("d", 1.00),
+            ("e", 1.00),
+        ]);
+        let mut opt = 0.;
+        for (_, o) in &v_weight {
+            opt += o;
+        }
+        let g = BiSRGraph::from_edge(edges, v_weight);
+
+        println!("{:?}", g);
+
+        println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
+    }
+
+
     #[test]
     fn test_util() {
         println!("{:?}", expected_success_distribution(2, 1.));
