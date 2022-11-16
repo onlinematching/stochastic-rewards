@@ -320,6 +320,65 @@ mod tests {
 
 
     #[test]
+    fn test14() {
+        let edges = vec![
+            ("X", "0"),
+            ("A0", "0"),
+            ("B0", "0"),
+            ("C0", "0"),
+            ("D0", "0"),
+            ("E0", "0"),
+            ("A1", "0"),
+            ("B1", "0"),
+            ("C1", "0"),
+            ("D1", "0"),
+            ("E1", "0"),
+            ("A0", "a0"),
+            ("B0", "b0"),
+            ("C0", "c0"),
+            ("D0", "d0"),
+            ("E0", "e0"),
+            ("B0", "a0"),
+            ("C0", "a0"),
+            ("D0", "a0"),
+            ("E0", "a0"),
+            ("A1", "a1"),
+            ("B1", "b1"),
+            ("C1", "c1"),
+            ("D1", "d1"),
+            ("E1", "e1"),
+            ("B1", "a1"),
+            ("C1", "a1"),
+            ("D1", "a1"),
+            ("E1", "a1"),
+        ];
+        let v_weight = HashMap::from([
+            ("0", 1.00),
+            ("a0", 1.00),
+            ("b0", 1.00),
+            ("c0", 1.00),
+            ("d0", 1.00),
+            ("e0", 1.00),
+            ("a1", 1.00),
+            ("b1", 1.00),
+            ("c1", 1.00),
+            ("d1", 1.00),
+            ("e1", 1.00),
+        ]);
+        let mut opt = 0.;
+        for (_, o) in &v_weight {
+            opt += o;
+        }
+        let g = BiSRGraph::from_edge(edges, v_weight);
+
+        println!("{:?}", g);
+
+        println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
+    }
+
+
+
+    #[test]
     fn test_util() {
         println!("{:?}", expected_success_distribution(2, 1.));
         println!("Hello, world!");
