@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 mod bisrgraph;
-mod test;
+mod test_edge;
 mod util;
 
 fn main() {
