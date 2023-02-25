@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod tests {
+mod tests_edge {
     use std::collections::HashMap;
 
     use crate::bisrgraph::BiSRGraph;
@@ -490,9 +490,4 @@ mod tests {
         println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
     }
 
-    #[test]
-    fn test_util() {
-        println!("{:?}", expected_success_distribution(2, 1.));
-        println!("Hello, world!");
-    }
 }

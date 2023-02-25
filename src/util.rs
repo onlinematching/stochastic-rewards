@@ -25,3 +25,4 @@ pub fn expected_success_distribution(n: Index, lambda: Weight) -> Vec<f64> {
     distro.push(1. - s);
     distro
 }
+
