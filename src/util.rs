@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use libm::{exp, pow};
 
 type Index = usize;
@@ -25,4 +27,16 @@ pub fn expected_success_distribution(n: Index, lambda: Weight) -> Vec<f64> {
     distro.push(1. - s);
     distro
 }
+
+pub fn array2weight<T>(v: Vec<T>) -> HashMap<T, f64>
+where
+    T: std::hash::Hash + std::cmp::Eq,
+{
+    let mut map = HashMap::new();
+    for k in v.into_iter() {
+        map.insert(k, 1.);
+    }
+    map
+}
+
 
