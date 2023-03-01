@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+#![allow(dead_code)]
 
 use libm::{exp, pow};
+use std::collections::HashMap;
 
 type Index = usize;
 type Weight = f64;
@@ -42,5 +43,3 @@ where
     }
     map
 }
-
-

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod env {
     use crate::policy;
 

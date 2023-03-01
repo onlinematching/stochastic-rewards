@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod policy {
     use tch::nn::Module;
     use tch::{nn, Tensor};
@@ -56,7 +58,5 @@ pub mod policy {
             }
             action
         }
-
-        
     }
 }

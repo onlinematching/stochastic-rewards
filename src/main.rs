@@ -1,3 +1,7 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(unreachable_code)]
+
 use anyhow::Result;
 use once_cell::sync::Lazy;
 use policy::policy::PolicyNet;
