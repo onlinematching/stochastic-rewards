@@ -1,6 +1,6 @@
 use anyhow::Result;
 use once_cell::sync::Lazy;
-use policy::policy::policy_net;
+use policy::policy::PolicyNet;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use tch::nn::{Module, OptimizerConfig};
@@ -19,7 +19,7 @@ static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().in
 pub fn run() -> Result<()> {
     let m = todo!();
     let vs = nn::VarStore::new(*DEVICE.lock().unwrap());
-    let net = policy_net(&vs.root());
+    let net = PolicyNet::new(&vs.root());
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
     for epoch in 1..200 {
         // let loss = net

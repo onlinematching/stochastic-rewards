@@ -5,6 +5,10 @@ use libm::{exp, pow};
 type Index = usize;
 type Weight = f64;
 
+pub fn sigmoid(x: f64) -> f64 {
+    1.0 / (1.0 + (-x).exp())
+}
+
 fn factorial(num: usize) -> usize {
     match num {
         0 => 1,
