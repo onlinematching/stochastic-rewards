@@ -26,6 +26,7 @@ pub fn run() -> Result<()> {
     let net = PolicyNet::new(&vs.root());
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
     for epoch in 1..200 {
+        todo!();
         // let loss = net
         //     .forward(&m.train_x)
         //     .cross_entropy_for_logits(&m.train_labels);

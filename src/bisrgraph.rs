@@ -9,7 +9,7 @@ type Index = usize;
 type Weight = f64;
 
 #[derive(Debug)]
-pub(crate) struct BiSRGraph {
+pub struct BiSRGraph {
     u: Index,
     v_lambda: Vec<Weight>,
     #[allow(dead_code)]

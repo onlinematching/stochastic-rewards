@@ -1,11 +1,9 @@
-#![allow(dead_code)]
-
 pub mod env {
     use crate::policy;
 
-    const M: usize = policy::policy::M;
+    const M: usize = crate::util::M;
 
-    #[derive(PartialEq)]
+    #[derive(PartialEq, Clone, Copy)]
     pub enum A {
         Success,
         Fail,
@@ -18,21 +16,34 @@ pub mod env {
     pub type Reward = f64;
 
     pub trait Env {
-        fn reset(&self, seed: i64);
+        fn reset(&mut self, seed: i64);
 
         // step(action) -> next_obs, reward, is_terminated, is_truncated
-        fn step(&self, action: ActionSpace) -> (ObservationSpace, Reward, bool, bool);
+        fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool);
     }
 
-    pub struct BiSRGraphGame {}
+    pub struct BiSRGraphGame {
+        agent_state: [[A; M]; M],
+        step: usize,
+    }
 
     impl Env for BiSRGraphGame {
-        fn reset(&self, _seed: i64) {
-            todo!()
+        fn reset(&mut self, _seed: i64) {
+            self.agent_state = [[A::Fail; M]; M];
+            self.step = 0;
         }
 
-        fn step(&self, action: ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
-            todo!()
+        // step(action) -> next_obs, reward, is_terminated, is_truncated
+        fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
+            self.agent_state[self.step] = action.clone();
+            self.step += 1;
+            
+            
+
+            if self.step == M {
+                return ((self.agent_state, self.step), 0., true, true);
+            }
+            ((self.agent_state, self.step), 0., false, false)
         }
     }
 }

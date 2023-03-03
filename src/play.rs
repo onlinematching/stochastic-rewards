@@ -7,8 +7,11 @@ mod play {
 
     pub fn iterate_batches(env: &dyn Env, net: &dyn Module, batch_size: i64) -> Vec<i64> {
         let mut batch = vec![];
+        todo!();
         batch
     }
 
-    pub fn filter_batch(batch: Vec<i64>, percentile: i32) {}
+    pub fn filter_batch(batch: Vec<i64>, percentile: i32) {
+        todo!()
+    }
 }

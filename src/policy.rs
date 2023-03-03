@@ -7,7 +7,7 @@ pub mod policy {
     use crate::env::env::{ActionProbabilitySpace, ObservationSpace, A};
     use crate::util::sigmoid;
 
-    pub const M: usize = 5;
+    pub const M: usize = crate::util::M;
 
     fn net(vs: &nn::Path) -> impl Module {
         const HIDDEN_LAYER: i64 = 128;
