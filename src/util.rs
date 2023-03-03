@@ -7,7 +7,7 @@ use crate::{
 use libm::{exp, pow};
 use std::collections::HashMap;
 
-pub const M: usize = 4;
+pub const M: usize = 5;
 
 type Index = usize;
 type Weight = f64;
@@ -75,5 +75,53 @@ pub fn check_symmetry_property(graph_obs: &[[A; M]; M], step: usize) -> bool {
 }
 
 pub fn agent_generate_graph(graph_obs: &ObservationSpace) -> BiSRGraph {
-    todo!()
+    assert_eq!(graph_obs.1, M, "Agent has not yet been terminated");
+    let graph_matrix = &graph_obs.0;
+    let mut weights = vec![0; M];
+    for i in 0..M {
+        weights[i] = i;
+    }
+    let weights = array2weight(weights);
+    let mut edges = Vec::new();
+    for v in 0..M {
+        for u in 0..M {
+            if graph_matrix[v][u] == A::Success {
+                edges.push((u, v));
+            }
+        }
+    }
+
+    BiSRGraph::from_edge(edges, weights)
+}
+
+#[cfg(test)]
+mod tests_util {
+    use super::M;
+    use crate::env::env::A;
+
+    #[test]
+    fn test() {
+        println!("Hello, world!");
+    }
+
+    #[test]
+    /// when M = 4, then:
+    /// obs_0 = [
+    ///     [A::Success, A::Success, A::Success, A::Success],
+    ///     [A::Fail, A::Success, A::Success, A::Success],
+    ///     [A::Fail, A::Fail, A::Success, A::Success],
+    ///     [A::Fail, A::Fail, A::Fail, A::Success],
+    /// ];
+    fn test_agent_generate_graph_m() {
+        let mut obs_0 = [[A::Fail; M]; M];
+        for i in 0..M {
+            for j in i..M {
+                obs_0[i][j] = A::Success
+            }
+        }
+        let obs_1 = M;
+        let g = super::agent_generate_graph(&(obs_0, obs_1));
+        println!("{:?}", g);
+        // BiSRGraph { u: 4, v_lambda: [1.0, 1.0, 1.0, 1.0], u_adj: [[0], [0, 1], [0, 1, 2], [0, 1, 2, 3]], v_adj: [[0, 1, 2, 3], [1, 2, 3], [2, 3], [3]] }
+    }
 }
