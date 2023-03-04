@@ -110,7 +110,7 @@ pub fn sampling_array(r: &[f64; M]) -> [A; M] {
     ans
 }
 
-pub fn percentile(data: Vec<f64>, percentile: f64) -> f64 {
+pub fn percentile(mut data: Vec<f64>, percentile: f64) -> f64 {
     data.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let k = ((percentile / 100.0) * (data.len() - 1) as f64).floor() as usize;
     let d = percentile / 100.0 * (data.len() - 1) as f64 - k as f64;
