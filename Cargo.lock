@@ -583,6 +583,7 @@ dependencies = [
  "libm",
  "num",
  "once_cell",
+ "rand",
  "tch",
 ]
 

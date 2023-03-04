@@ -84,7 +84,7 @@ impl BiSRGraph {
     #[allow(non_snake_case)]
     #[allow(dead_code)]
     pub fn OPT(self: &Self) -> f64 {
-        todo!()
+        return self.u as f64
     }
 
     #[allow(non_snake_case)]

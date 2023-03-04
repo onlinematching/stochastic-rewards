@@ -6,7 +6,7 @@ pub mod env {
 
     const M: usize = crate::util::M;
 
-    #[derive(PartialEq, Clone, Copy)]
+    #[derive(PartialEq, Clone, Copy, Debug)]
     pub enum A {
         Success,
         Fail,
@@ -19,7 +19,7 @@ pub mod env {
     pub type Reward = f64;
 
     pub trait Env {
-        fn reset(&mut self, seed: i64);
+        fn reset(&mut self, seed: i64) -> (ObservationSpace, Reward, bool, bool);
 
         // step(action) -> next_obs, reward, is_terminated, is_truncated
         fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool);
@@ -31,9 +31,10 @@ pub mod env {
     }
 
     impl Env for BiSRGraphGame {
-        fn reset(&mut self, _seed: i64) {
+        fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
             self.agent_state = [[A::Fail; M]; M];
             self.step = 0;
+            ((self.agent_state, self.step), 0., false, false)
         }
 
         // step(action) -> next_obs, reward, is_terminated, is_truncated

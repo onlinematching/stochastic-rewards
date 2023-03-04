@@ -5,6 +5,8 @@ use crate::{
     env::env::{ObservationSpace, A},
 };
 use libm::{exp, pow};
+use rand::distributions::Bernoulli;
+use rand::prelude::*;
 use std::collections::HashMap;
 
 pub const M: usize = 5;
@@ -94,9 +96,23 @@ pub fn agent_generate_graph(graph_obs: &ObservationSpace) -> BiSRGraph {
     BiSRGraph::from_edge(edges, weights)
 }
 
+pub fn sampling_array(r: &[f64; M]) -> [A; M] {
+    let mut ans = [A::Fail; M];
+    let mut rng = thread_rng();
+    for i in 0..M {
+        let bernoulli = Bernoulli::new(r[i]).unwrap();
+        let sample = bernoulli.sample(&mut rng);
+        match sample {
+            true => ans[i] = A::Success,
+            false => ans[i] = A::Fail,
+        }
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests_util {
-    use super::M;
+    use super::{sampling_array, M};
     use crate::env::env::A;
 
     #[test]
@@ -123,5 +139,13 @@ mod tests_util {
         let g = super::agent_generate_graph(&(obs_0, obs_1));
         println!("{:?}", g);
         // BiSRGraph { u: 4, v_lambda: [1.0, 1.0, 1.0, 1.0], u_adj: [[0], [0, 1], [0, 1, 2], [0, 1, 2, 3]], v_adj: [[0, 1, 2, 3], [1, 2, 3], [2, 3], [3]] }
+    }
+
+    #[test]
+    fn test_bernoulli_m5() {
+        // let r = [0.1, 0.2, 0.8, 1.0, 1.1]; // value: 1.1 be InvalidProbability
+        let r = [0.1, 0.2, 0.8, 1.0, 0.9];
+        let sample = sampling_array(&r);
+        println!("{:?}", sample);
     }
 }
