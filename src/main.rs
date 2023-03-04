@@ -33,8 +33,8 @@ pub fn run() -> Result<()> {
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
     for epoch in 1..2 {
-        let batch = iterate_batches(&mut env, &policy_net, 7);
-        // println!("{:?}", batch);
+        let batch = iterate_batches(&mut env, &policy_net, 1);
+        println!("{:?}", batch);
         let (obs_vec, act_vec, reward_bound, reward_mean) = filter_batch(batch, PERCENTILE);
         opt.zero_grad();
         let observation = obs_vec
@@ -51,6 +51,7 @@ pub fn run() -> Result<()> {
         let action = Tensor::of_slice(&action);
         action.print();
         let action_scores = policy_net.forward(&observation);
+        // .cross_entropy_for_logits(&action);
         action_scores.print();
         let loss = action_scores.cross_entropy_for_logits(&action);
         opt.backward_step(&loss);

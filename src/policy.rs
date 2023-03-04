@@ -9,6 +9,12 @@ pub mod policy {
 
     pub const M: usize = crate::util::M;
 
+    pub const fn pow2(n: usize) -> usize {
+        1 << n
+    }
+
+    pub const LABELS: usize = pow2(M);
+
     pub fn policy_net(vs: &nn::Path) -> impl Module {
         const HIDDEN_LAYER: i64 = 128;
         nn::seq()
@@ -19,7 +25,12 @@ pub mod policy {
                 Default::default(),
             ))
             .add_fn(|xs| xs.relu())
-            .add(nn::linear(vs, HIDDEN_LAYER, M as i64, Default::default()))
+            .add(nn::linear(
+                vs,
+                HIDDEN_LAYER,
+                LABELS as i64,
+                Default::default(),
+            ))
     }
 
     pub fn transmute_observation(obs: &ObservationSpace) -> Tensor {
@@ -40,13 +51,10 @@ pub mod policy {
 
     pub fn transmute_action(raw_action: &Tensor) -> ActionProbabilitySpace {
         let action = Vec::<f32>::from(raw_action.view(-1));
-        let mut action: ActionProbabilitySpace = action
+        let action: ActionProbabilitySpace = action
             .as_slice()
             .try_into()
             .expect("slice with incorrect length");
-        for i in 0..M {
-            action[i] = sigmoid(action[i]);
-        }
         action
     }
 }

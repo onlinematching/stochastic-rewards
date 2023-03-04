@@ -3,6 +3,7 @@
 use crate::{
     bisrgraph::BiSRGraph,
     env::env::{ActionSpace, ObservationSpace, A},
+    policy::policy::pow2,
 };
 use libm::{exp, pow};
 use rand::distributions::Bernoulli;
@@ -97,18 +98,25 @@ pub fn agent_generate_graph(graph_obs: &ObservationSpace) -> BiSRGraph {
     BiSRGraph::from_edge(edges, weights)
 }
 
-pub fn sampling_array(r: &[f32; M]) -> [A; M] {
-    let mut ans = [A::Fail; M];
-    let mut rng = thread_rng();
-    for i in 0..M {
-        let bernoulli = Bernoulli::new(r[i].into()).unwrap();
-        let sample = bernoulli.sample(&mut rng);
-        match sample {
-            true => ans[i] = A::Success,
-            false => ans[i] = A::Fail,
+const LABELS: usize = pow2(M);
+pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
+    let mut index = 0;
+    let mut max = r[0];
+    for i in 0..LABELS {
+        if r[i] > max {
+            max = r[i];
+            index = i;
         }
     }
-    ans
+    let mut binary = [A::Fail; M];
+    for i in 0..M {
+        binary[M - 1 - i] = match (index & (1 << i)) != 0 {
+            true => A::Success,
+            false => A::Fail,
+        };
+    }
+
+    binary
 }
 
 pub fn percentile(mut data: Vec<f64>, percentile: f64) -> f64 {
@@ -128,7 +136,7 @@ pub fn transmute_action_onehot(act_vec: &ActionSpace) -> i64 {
         v *= 2;
         match act {
             A::Success => v += 1,
-            A::Fail => {},
+            A::Fail => {}
         }
     }
     v
@@ -166,13 +174,13 @@ mod tests_util {
         //   [0, 1, 2], [0, 1, 2, 3]], v_adj: [[0, 1, 2, 3], [1, 2, 3], [2, 3], [3]] }
     }
 
-    #[test]
-    fn test_bernoulli_m5() {
-        // let r = [0.1, 0.2, 0.8, 1.0, 1.1]; // value: 1.1 be InvalidProbability
-        let r = [0.1, 0.2, 0.8, 1.0, 0.9];
-        let sample = sampling_array(&r);
-        println!("{:?}", sample);
-    }
+    // #[test]
+    // fn test_bernoulli_m5() {
+    //     // let r = [0.1, 0.2, 0.8, 1.0, 1.1]; // value: 1.1 be InvalidProbability
+    //     let r = [0.1, 0.2, 0.8, 1.0, 0.9];
+    //     let sample = sampling_array(&r);
+    //     println!("{:?}", sample);
+    // }
 
     #[test]
     fn test_percentile() {

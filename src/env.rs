@@ -1,6 +1,6 @@
 pub mod env {
     use crate::{
-        policy,
+        policy::{self, policy::pow2},
         util::{agent_generate_graph, check_symmetry_property},
     };
 
@@ -12,9 +12,10 @@ pub mod env {
         Fail,
     }
 
+    const LABELS: usize = pow2(M);
     pub type ActionSpace = [A; M];
     pub type ObservationSpace = ([[A; M]; M], usize);
-    pub type ActionProbabilitySpace = [f32; M];
+    pub type ActionProbabilitySpace = [f32; LABELS];
 
     pub type Reward = f64;
 
