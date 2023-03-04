@@ -2,12 +2,13 @@
 
 use crate::{
     bisrgraph::BiSRGraph,
-    env::env::{ObservationSpace, A},
+    env::env::{ActionSpace, ObservationSpace, A},
 };
 use libm::{exp, pow};
 use rand::distributions::Bernoulli;
 use rand::prelude::*;
 use std::collections::HashMap;
+use tch::Tensor;
 
 pub const M: usize = 5;
 
@@ -119,6 +120,18 @@ pub fn percentile(mut data: Vec<f64>, percentile: f64) -> f64 {
     } else {
         data[k] * (1.0 - d) + data[k + 1] * d
     }
+}
+
+pub fn transmute_action_onehot(act_vec: &ActionSpace) -> i64 {
+    let mut v = 0;
+    for &act in act_vec {
+        v *= 2;
+        match act {
+            A::Success => v += 1,
+            A::Fail => {},
+        }
+    }
+    v
 }
 
 #[cfg(test)]

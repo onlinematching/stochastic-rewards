@@ -5,17 +5,19 @@ pub mod play {
 
     use crate::{
         env::env::{ActionSpace, Env, ObservationSpace},
-        util::sampling_array, policy::policy::{transmute_observation, transmute_action},
+        policy::policy::{transmute_action, transmute_observation},
+        util::sampling_array,
     };
 
     const SEED: i64 = 42;
 
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct EpisodeStep {
         observation: ObservationSpace,
         action: ActionSpace,
     }
 
+    #[derive(Debug)]
     pub struct Episode {
         reward: f64,
         steps: Vec<EpisodeStep>,

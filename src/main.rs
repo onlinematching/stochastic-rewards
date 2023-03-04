@@ -12,6 +12,7 @@ use tch::nn;
 use tch::nn::{Module, OptimizerConfig};
 use tch::Device;
 use tch::Tensor;
+use util::transmute_action_onehot;
 mod bisrgraph;
 mod env;
 mod play;
@@ -32,7 +33,8 @@ pub fn run() -> Result<()> {
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
     for epoch in 1..2 {
-        let batch = iterate_batches(&mut env, &policy_net, 2);
+        let batch = iterate_batches(&mut env, &policy_net, 7);
+        // println!("{:?}", batch);
         let (obs_vec, act_vec, reward_bound, reward_mean) = filter_batch(batch, PERCENTILE);
         opt.zero_grad();
         let observation = obs_vec
@@ -40,13 +42,18 @@ pub fn run() -> Result<()> {
             .map(|obs| transmute_observation(obs))
             .collect::<Vec<Tensor>>();
         let observation = Tensor::stack(&observation, 0);
-        println!("{:?}", observation);
-
-        // let action_scores = policy_net.forward();
-        // let loss = net
-        //     .forward(&m.train_x)
-        //     .cross_entropy_for_logits(&m.train_labels);
-        // opt.backward_step(&loss);
+        observation.print();
+        println!("{:?}", observation.size());
+        let action = act_vec
+            .iter()
+            .map(|act| transmute_action_onehot(act))
+            .collect::<Vec<i64>>();
+        let action = Tensor::of_slice(&action);
+        action.print();
+        let action_scores = policy_net.forward(&observation);
+        action_scores.print();
+        let loss = action_scores.cross_entropy_for_logits(&action);
+        opt.backward_step(&loss);
     }
     Ok(())
 }
