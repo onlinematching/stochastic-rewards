@@ -27,6 +27,7 @@ pub mod play {
         let mut episode_steps = vec![];
         let mut obs = env.reset(SEED);
         loop {
+            println!("{:?}", obs);
             let obs_v = obs.0;
             let trans_obs_v = transmute_observation(&obs_v);
             let trans_act_probs_v = net.forward(&trans_obs_v);

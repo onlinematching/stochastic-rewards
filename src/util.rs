@@ -14,7 +14,7 @@ pub const M: usize = 5;
 type Index = usize;
 type Weight = f64;
 
-pub fn sigmoid(x: f64) -> f64 {
+pub fn sigmoid(x: f32) -> f32 {
     1.0 / (1.0 + (-x).exp())
 }
 
@@ -96,11 +96,11 @@ pub fn agent_generate_graph(graph_obs: &ObservationSpace) -> BiSRGraph {
     BiSRGraph::from_edge(edges, weights)
 }
 
-pub fn sampling_array(r: &[f64; M]) -> [A; M] {
+pub fn sampling_array(r: &[f32; M]) -> [A; M] {
     let mut ans = [A::Fail; M];
     let mut rng = thread_rng();
     for i in 0..M {
-        let bernoulli = Bernoulli::new(r[i]).unwrap();
+        let bernoulli = Bernoulli::new(r[i].into()).unwrap();
         let sample = bernoulli.sample(&mut rng);
         match sample {
             true => ans[i] = A::Success,

@@ -582,6 +582,7 @@ dependencies = [
  "itertools",
  "libm",
  "num",
+ "num-traits",
  "once_cell",
  "rand",
  "tch",

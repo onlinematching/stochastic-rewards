@@ -14,7 +14,7 @@ pub mod env {
 
     pub type ActionSpace = [A; M];
     pub type ObservationSpace = ([[A; M]; M], usize);
-    pub type ActionProbabilitySpace = [f64; M];
+    pub type ActionProbabilitySpace = [f32; M];
 
     pub type Reward = f64;
 

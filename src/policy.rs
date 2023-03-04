@@ -11,7 +11,7 @@ pub mod policy {
 
     pub fn policy_net(vs: &nn::Path) -> impl Module {
         const HIDDEN_LAYER: i64 = 128;
-        let innernet = nn::seq()
+        nn::seq()
             .add(nn::linear(
                 vs / "layer1",
                 (M * M + 1) as i64,
@@ -19,13 +19,12 @@ pub mod policy {
                 Default::default(),
             ))
             .add_fn(|xs| xs.relu())
-            .add(nn::linear(vs, HIDDEN_LAYER, M as i64, Default::default()));
-        innernet
+            .add(nn::linear(vs, HIDDEN_LAYER, M as i64, Default::default()))
     }
 
     pub fn transmute_observation(obs: &ObservationSpace) -> Tensor {
         let mut obs_vec = vec![];
-        obs_vec.push(obs.1 as f64);
+        obs_vec.push(obs.1 as f32);
         let obs = &obs.0;
         for v_adj in obs {
             for u in v_adj {
@@ -40,7 +39,7 @@ pub mod policy {
     }
 
     pub fn transmute_action(raw_action: &Tensor) -> ActionProbabilitySpace {
-        let action = Vec::<f64>::from(raw_action.view(-1));
+        let action = Vec::<f32>::from(raw_action.view(-1));
         let mut action: ActionProbabilitySpace = action
             .as_slice()
             .try_into()
