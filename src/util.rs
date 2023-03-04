@@ -11,7 +11,7 @@ use rand::prelude::*;
 use std::collections::HashMap;
 use tch::Tensor;
 
-pub const M: usize = 5;
+pub const M: usize = 6;
 
 type Index = usize;
 type Weight = f64;

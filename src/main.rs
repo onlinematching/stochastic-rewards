@@ -25,7 +25,7 @@ mod util;
 
 static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
-const PERCENTILE: i32 = 1;
+const PERCENTILE: f64 = 0.3;
 
 pub fn run() -> Result<()> {
     let mut env = env::env::BiSRGraphGame::new();
@@ -35,7 +35,7 @@ pub fn run() -> Result<()> {
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
     for epoch in 1..10000 {
-        let batch = iterate_batches(&mut env, &policy_net, 512);
+        let batch = iterate_batches(&mut env, &policy_net, 1024);
         // println!("{:?}", batch);
         let (obs_vec, act_vec, reward_bound, reward_mean, reward_lowest) =
             filter_batch(batch, PERCENTILE);

@@ -16,8 +16,8 @@ pub mod policy {
     pub const LABELS: usize = pow2(M);
 
     pub fn policy_net(vs: &nn::Path) -> impl Module {
-        const HIDDEN_LAYER_1: i64 = 128;
-        const HIDDEN_LAYER_2: i64 = 128;
+        const HIDDEN_LAYER_1: i64 = pow2(M+2) as i64;
+        const HIDDEN_LAYER_2: i64 = pow2(M+2) as i64;
         nn::seq()
             .add(nn::linear(
                 vs / "layer1",

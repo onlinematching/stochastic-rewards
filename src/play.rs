@@ -9,7 +9,7 @@ pub mod play {
         util::sampling_array,
     };
 
-    const DEBUG: bool = true;
+    const DEBUG: bool = false;
 
     const SEED: i64 = 42;
 
@@ -74,9 +74,9 @@ pub mod play {
 
     pub fn filter_batch(
         batch: Vec<Episode>,
-        percentile: i32,
+        percentile: f64,
     ) -> (Vec<ObservationSpace>, Vec<ActionSpace>, f64, f64, f64) {
-        assert!(0 <= percentile && percentile <= 100);
+        assert!(0. <= percentile && percentile <= 100.);
         let rewards = batch
             .iter()
             .map(|episode| episode.reward)
@@ -87,7 +87,7 @@ pub mod play {
             .iter()
             .min_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap();
-        let reward_bound = crate::util::percentile(rewards, percentile as f64);
+        let reward_bound = crate::util::percentile(rewards, percentile);
 
         let mut train_obs: Vec<ObservationSpace> = Vec::new();
         let mut train_act: Vec<ActionSpace> = Vec::new();
