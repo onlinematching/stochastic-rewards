@@ -42,17 +42,18 @@ pub fn run() -> Result<()> {
             .map(|obs| transmute_observation(obs))
             .collect::<Vec<Tensor>>();
         let observation = Tensor::stack(&observation, 0);
-        observation.print();
+        // observation.print();
         println!("{:?}", observation.size());
         let action = act_vec
             .iter()
             .map(|act| transmute_action_onehot(act))
             .collect::<Vec<i64>>();
         let action = Tensor::of_slice(&action);
-        action.print();
+        // action.print();
         let action_scores = policy_net.forward(&observation);
-        action_scores.print();
+        // action_scores.print();
         let loss = action_scores.cross_entropy_for_logits(&action);
+        // loss.print();
         opt.backward_step(&loss);
     }
     Ok(())

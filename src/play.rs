@@ -9,7 +9,7 @@ pub mod play {
         util::sampling_array,
     };
 
-    const DEBUG: bool = true;
+    const DEBUG: bool = false;
 
     const SEED: i64 = 42;
 
@@ -48,6 +48,10 @@ pub mod play {
             };
             episode_steps.push(step);
             if is_terminated || is_truncated {
+                if DEBUG && is_terminated {
+                    let graph = crate::util::agent_generate_graph(&obs_value);
+                    println!("{:?}", graph);
+                }
                 let episode = Episode {
                     reward: episode_reward,
                     steps: episode_steps.clone(),
