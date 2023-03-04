@@ -110,10 +110,21 @@ pub fn sampling_array(r: &[f64; M]) -> [A; M] {
     ans
 }
 
+pub fn percentile(data: Vec<f64>, percentile: f64) -> f64 {
+    data.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let k = ((percentile / 100.0) * (data.len() - 1) as f64).floor() as usize;
+    let d = percentile / 100.0 * (data.len() - 1) as f64 - k as f64;
+    if k >= data.len() - 1 {
+        data[k]
+    } else {
+        data[k] * (1.0 - d) + data[k + 1] * d
+    }
+}
+
 #[cfg(test)]
 mod tests_util {
     use super::{sampling_array, M};
-    use crate::env::env::A;
+    use crate::{env::env::A, util::percentile};
 
     #[test]
     fn test() {
@@ -138,7 +149,8 @@ mod tests_util {
         let obs_1 = M;
         let g = super::agent_generate_graph(&(obs_0, obs_1));
         println!("{:?}", g);
-        // BiSRGraph { u: 4, v_lambda: [1.0, 1.0, 1.0, 1.0], u_adj: [[0], [0, 1], [0, 1, 2], [0, 1, 2, 3]], v_adj: [[0, 1, 2, 3], [1, 2, 3], [2, 3], [3]] }
+        // BiSRGraph { u: 4, v_lambda: [1.0, 1.0, 1.0, 1.0], u_adj: [[0], [0, 1],
+        //   [0, 1, 2], [0, 1, 2, 3]], v_adj: [[0, 1, 2, 3], [1, 2, 3], [2, 3], [3]] }
     }
 
     #[test]
@@ -147,5 +159,12 @@ mod tests_util {
         let r = [0.1, 0.2, 0.8, 1.0, 0.9];
         let sample = sampling_array(&r);
         println!("{:?}", sample);
+    }
+
+    #[test]
+    fn test_percentile() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let p = percentile(data, 50.0);
+        println!("{}", p); // 3.0
     }
 }

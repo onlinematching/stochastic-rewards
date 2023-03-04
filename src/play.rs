@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-mod play {
+pub mod play {
     use tch::nn::Module;
 
     use crate::{
@@ -44,7 +44,7 @@ mod play {
             episode_steps.push(step);
             if is_terminated || is_truncated {
                 let episode = Episode {
-                    reward,
+                    reward: episode_reward,
                     steps: episode_steps.clone(),
                 };
                 if reward > 0. {
@@ -59,10 +59,28 @@ mod play {
             }
             obs = next_obs;
         }
-
     }
 
-    pub fn filter_batch(batch: Vec<i64>, percentile: i32) {
-        todo!()
+    pub fn filter_batch(
+        batch: Vec<Episode>,
+        percentile: i32,
+    ) -> (Vec<ObservationSpace>, Vec<ActionSpace>, f64, f64) {
+        assert!(0 <= percentile && percentile <= 100);
+        let rewards = batch
+            .iter()
+            .map(|episode| episode.reward)
+            .collect::<Vec<f64>>();
+        let reward_mean = rewards.iter().sum::<f64>() / rewards.len() as f64;
+        let reward_bound = crate::util::percentile(rewards, percentile as f64);
+        let mut train_obs: Vec<ObservationSpace> = Vec::new();
+        let mut train_act: Vec<ActionSpace> = Vec::new();
+        for Episode { reward, ref steps } in batch {
+            if reward < reward_bound {
+                continue;
+            }
+            train_obs.extend(steps.iter().map(|step| step.observation));
+            train_act.extend(steps.iter().map(|step| step.action));
+        }
+        return (train_obs, train_act, reward_bound, reward_mean);
     }
 }

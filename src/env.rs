@@ -30,6 +30,15 @@ pub mod env {
         step: usize,
     }
 
+    impl BiSRGraphGame {
+        pub fn new() -> Self {
+            Self {
+                agent_state: [[A::Fail; M]; M],
+                step: 0,
+            }
+        }
+    }
+
     impl Env for BiSRGraphGame {
         fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
             self.agent_state = [[A::Fail; M]; M];
