@@ -27,17 +27,16 @@ pub mod play {
         let mut episode_steps = vec![];
         let mut obs = env.reset(SEED);
         loop {
-            println!("{:?}", obs);
             let obs_v = obs.0;
             let trans_obs_v = transmute_observation(&obs_v);
             let trans_act_probs_v = net.forward(&trans_obs_v);
             let act_probs_v = transmute_action(&trans_act_probs_v);
             let act_sample = sampling_array(&act_probs_v);
             let mut next_obs = env.step(&act_sample);
-            let obs_value = obs.0;
-            let reward = obs.1;
-            let is_terminated = obs.2;
-            let is_truncated = obs.3;
+            let obs_value = next_obs.0;
+            let reward = next_obs.1;
+            let is_terminated = next_obs.2;
+            let is_truncated = next_obs.3;
             episode_reward += reward;
             let step = EpisodeStep {
                 observation: obs_value,
@@ -51,7 +50,7 @@ pub mod play {
                 };
                 if reward > 0. {
                     batch.push(episode);
-                }
+                };
                 episode_reward = 0.;
                 episode_steps.clear();
                 next_obs = env.reset(42);

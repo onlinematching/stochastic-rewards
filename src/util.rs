@@ -55,7 +55,7 @@ where
 pub fn check_symmetry_property(graph_obs: &[[A; M]; M], step: usize) -> bool {
     for i in 0..step {
         let fore_adj: &[A; M] = &graph_obs[i];
-        let tail_adj: &[A; M] = &graph_obs[step];
+        let tail_adj: &[A; M] = &graph_obs[step - 1];
         let mut contain = true;
         let mut disjoint = true;
         for j in 0..M {
