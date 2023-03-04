@@ -25,7 +25,7 @@ mod util;
 
 static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
-const PERCENTILE: i32 = 30;
+const PERCENTILE: i32 = 1;
 
 pub fn run() -> Result<()> {
     let mut env = env::env::BiSRGraphGame::new();
@@ -35,9 +35,10 @@ pub fn run() -> Result<()> {
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
     for epoch in 1..10000 {
-        let batch = iterate_batches(&mut env, &policy_net, 256);
+        let batch = iterate_batches(&mut env, &policy_net, 512);
         // println!("{:?}", batch);
-        let (obs_vec, act_vec, reward_bound, reward_mean) = filter_batch(batch, PERCENTILE);
+        let (obs_vec, act_vec, reward_bound, reward_mean, reward_lowest) =
+            filter_batch(batch, PERCENTILE);
         opt.zero_grad();
         let observation = obs_vec
             .iter()
@@ -56,13 +57,13 @@ pub fn run() -> Result<()> {
         // action_scores.print();
         let loss = action_scores.cross_entropy_for_logits(&action);
         println!(
-            "reward_bound = {:?}, reward_mean = {:?}",
-            reward_bound, reward_mean
+            "reward_lowest = {:?}, reward_bound = {:?}, reward_mean = {:?}",
+            reward_lowest, reward_bound, reward_mean
         );
         loss.print();
         opt.backward_step(&loss);
-        if epoch % 10 == 0 {
-            thread::sleep(Duration::from_secs(3));
+        if epoch % 40 == 0 {
+            thread::sleep(Duration::from_secs(4));
         }
     }
     Ok(())

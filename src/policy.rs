@@ -16,18 +16,19 @@ pub mod policy {
     pub const LABELS: usize = pow2(M);
 
     pub fn policy_net(vs: &nn::Path) -> impl Module {
-        const HIDDEN_LAYER: i64 = 128;
+        const HIDDEN_LAYER_1: i64 = 128;
+        const HIDDEN_LAYER_2: i64 = 128;
         nn::seq()
             .add(nn::linear(
                 vs / "layer1",
                 (M * M + 1) as i64,
-                HIDDEN_LAYER,
+                HIDDEN_LAYER_1,
                 Default::default(),
             ))
             .add_fn(|xs| xs.relu())
             .add(nn::linear(
                 vs,
-                HIDDEN_LAYER,
+                HIDDEN_LAYER_2,
                 LABELS as i64,
                 Default::default(),
             ))

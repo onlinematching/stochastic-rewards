@@ -75,14 +75,20 @@ pub mod play {
     pub fn filter_batch(
         batch: Vec<Episode>,
         percentile: i32,
-    ) -> (Vec<ObservationSpace>, Vec<ActionSpace>, f64, f64) {
+    ) -> (Vec<ObservationSpace>, Vec<ActionSpace>, f64, f64, f64) {
         assert!(0 <= percentile && percentile <= 100);
         let rewards = batch
             .iter()
             .map(|episode| episode.reward)
             .collect::<Vec<f64>>();
         let reward_mean = rewards.iter().sum::<f64>() / rewards.len() as f64;
+
+        let reward_lowest = *rewards
+            .iter()
+            .min_by(|a, b| a.partial_cmp(b).unwrap())
+            .unwrap();
         let reward_bound = crate::util::percentile(rewards, percentile as f64);
+
         let mut train_obs: Vec<ObservationSpace> = Vec::new();
         let mut train_act: Vec<ActionSpace> = Vec::new();
         for Episode { reward, ref steps } in batch {
@@ -92,6 +98,12 @@ pub mod play {
             train_obs.extend(steps.iter().map(|step| step.observation));
             train_act.extend(steps.iter().map(|step| step.action));
         }
-        return (train_obs, train_act, reward_bound, reward_mean);
+        return (
+            train_obs,
+            train_act,
+            reward_bound,
+            reward_mean,
+            reward_lowest,
+        );
     }
 }
