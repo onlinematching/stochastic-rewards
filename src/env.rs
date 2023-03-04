@@ -1,5 +1,8 @@
 pub mod env {
-    use crate::policy;
+    use crate::{
+        policy,
+        util::{agent_generate_graph, check_symmetry_property},
+    };
 
     const M: usize = crate::util::M;
 
@@ -37,11 +40,17 @@ pub mod env {
         fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
             self.agent_state[self.step] = action.clone();
             self.step += 1;
-            
-            todo!();
+
+            if !check_symmetry_property(&self.agent_state, self.step) {
+                return ((self.agent_state, self.step), 0., false, true);
+            }
 
             if self.step == M {
-                return ((self.agent_state, self.step), 0., true, true);
+                let graph = agent_generate_graph(&(self.agent_state, self.step));
+                let opt = graph.OPT();
+                let alg = graph.ALG();
+                let ratio = alg / opt;
+                return ((self.agent_state, self.step), ratio, true, false);
             }
             ((self.agent_state, self.step), 0., false, false)
         }
