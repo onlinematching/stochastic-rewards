@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::util::expected_success_distribution;
 use num::integer::binomial;
 use std::collections::HashMap;
@@ -80,11 +79,42 @@ impl BiSRGraph {
     }
 }
 
+fn dfs_finding_max(
+    u: Index,
+    graph: &BiSRGraph,
+    match_: &mut Vec<Option<Index>>,
+    vis: &mut Vec<bool>,
+) -> bool {
+    for &v in graph.u_adj[u].iter() {
+        if !vis[v] {
+            vis[v] = true;
+            if match_[v].is_none() || dfs_finding_max(match_[v].unwrap(), graph, match_, vis) {
+                match_[v] = Some(u);
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn maximum_matching(graph: &BiSRGraph) -> usize {
+    let n = graph.u;
+    let m = graph.v_lambda.len();
+    let mut match_ = vec![None; m];
+    let mut res = 0;
+    for i in 0..n {
+        let mut vis = vec![false; m];
+        if dfs_finding_max(i, graph, &mut match_, &mut vis) {
+            res += 1;
+        }
+    }
+    res
+}
+
 impl BiSRGraph {
     #[allow(non_snake_case)]
-    #[allow(dead_code)]
     pub fn OPT(self: &Self) -> f64 {
-        return self.u as f64
+        return maximum_matching(self) as f64;
     }
 
     #[allow(non_snake_case)]

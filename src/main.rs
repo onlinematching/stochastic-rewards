@@ -8,6 +8,8 @@ use play::play::{filter_batch, iterate_batches};
 use policy::policy::{policy_net, transmute_observation};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use std::thread;
+use std::time::Duration;
 use tch::nn;
 use tch::nn::{Module, OptimizerConfig};
 use tch::Device;
@@ -23,7 +25,7 @@ mod util;
 
 static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
-const PERCENTILE: i32 = 70;
+const PERCENTILE: i32 = 30;
 
 pub fn run() -> Result<()> {
     let mut env = env::env::BiSRGraphGame::new();
@@ -32,9 +34,9 @@ pub fn run() -> Result<()> {
     let policy_net = policy_net(&vs_ref_binding);
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
-    for epoch in 1..2 {
-        let batch = iterate_batches(&mut env, &policy_net, 3);
-        println!("{:?}", batch);
+    for epoch in 1..10000 {
+        let batch = iterate_batches(&mut env, &policy_net, 256);
+        // println!("{:?}", batch);
         let (obs_vec, act_vec, reward_bound, reward_mean) = filter_batch(batch, PERCENTILE);
         opt.zero_grad();
         let observation = obs_vec
@@ -53,8 +55,15 @@ pub fn run() -> Result<()> {
         let action_scores = policy_net.forward(&observation);
         // action_scores.print();
         let loss = action_scores.cross_entropy_for_logits(&action);
-        // loss.print();
+        println!(
+            "reward_bound = {:?}, reward_mean = {:?}",
+            reward_bound, reward_mean
+        );
+        loss.print();
         opt.backward_step(&loss);
+        if epoch % 10 == 0 {
+            thread::sleep(Duration::from_secs(3));
+        }
     }
     Ok(())
 }

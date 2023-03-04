@@ -9,7 +9,7 @@ pub mod play {
         util::sampling_array,
     };
 
-    const DEBUG: bool = false;
+    const DEBUG: bool = true;
 
     const SEED: i64 = 42;
 
@@ -51,6 +51,8 @@ pub mod play {
                 if DEBUG && is_terminated {
                     let graph = crate::util::agent_generate_graph(&obs_value);
                     println!("{:?}", graph);
+                    println!("ALG = {:?}, OPT = {:?}", graph.ALG(), graph.OPT());
+                    println!("rario = {:?}", graph.ALG() / graph.OPT());
                 }
                 let episode = Episode {
                     reward: episode_reward,
@@ -84,7 +86,7 @@ pub mod play {
         let mut train_obs: Vec<ObservationSpace> = Vec::new();
         let mut train_act: Vec<ActionSpace> = Vec::new();
         for Episode { reward, ref steps } in batch {
-            if reward < reward_bound {
+            if reward > reward_bound {
                 continue;
             }
             train_obs.extend(steps.iter().map(|step| step.observation));
