@@ -9,6 +9,8 @@ pub mod play {
         util::sampling_array,
     };
 
+    const DEBUG: bool = true;
+
     const SEED: i64 = 42;
 
     #[derive(Clone, Debug)]

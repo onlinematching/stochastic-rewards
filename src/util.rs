@@ -1,11 +1,11 @@
-#![allow(dead_code)]
-
 use crate::{
     bisrgraph::BiSRGraph,
     env::env::{ActionSpace, ObservationSpace, A},
     policy::policy::pow2,
 };
 use libm::{exp, pow};
+use ndarray::{Array, Dim};
+use ndarray_rand::rand_distr::Uniform;
 use rand::distributions::Bernoulli;
 use rand::prelude::*;
 use std::collections::HashMap;
@@ -98,16 +98,26 @@ pub fn agent_generate_graph(graph_obs: &ObservationSpace) -> BiSRGraph {
     BiSRGraph::from_edge(edges, weights)
 }
 
-const LABELS: usize = pow2(M);
-pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
-    let mut index = 0;
-    let mut max = r[0];
-    for i in 0..LABELS {
-        if r[i] > max {
-            max = r[i];
-            index = i;
+fn sample_from_softmax(arr: &Array<&f32, Dim<[usize; 1]>>) -> usize {
+    let mut rng = rand::thread_rng();
+    let mut probabilities = arr.mapv(|x| x.exp());
+    let sum = probabilities.sum();
+    probabilities /= sum;
+    let uniform = Uniform::new(0.0, 1.0);
+    let mut acc = 0.0;
+    for (index, value) in probabilities.iter().enumerate() {
+        acc += *value;
+        if uniform.sample(&mut rng) < acc {
+            return index;
         }
     }
+    arr.shape()[0] - 1
+}
+
+const LABELS: usize = pow2(M);
+pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
+    let arr = Array::from_iter(r.into_iter());
+    let index = sample_from_softmax(&arr);
     let mut binary = [A::Fail; M];
     for i in 0..M {
         binary[M - 1 - i] = match (index & (1 << i)) != 0 {
