@@ -3,22 +3,63 @@
 mod play {
     use tch::nn::Module;
 
-    use crate::{env::env::Env, policy::policy::PolicyNet};
+    use crate::{
+        env::env::{ActionSpace, Env, ObservationSpace},
+        policy::policy::PolicyNet,
+        util::sampling_array,
+    };
 
     const SEED: i64 = 42;
 
-    pub fn iterate_batches(env: &mut dyn Env, net: &PolicyNet, batch_size: i64) -> Vec<i64> {
+    #[derive(Clone)]
+    pub struct EpisodeStep {
+        observation: ObservationSpace,
+        action: ActionSpace,
+    }
+
+    pub struct Episode {
+        reward: f64,
+        steps: Vec<EpisodeStep>,
+    }
+
+    pub fn iterate_batches(env: &mut dyn Env, net: &PolicyNet, batch_size: usize) -> Vec<Episode> {
         let mut batch = vec![];
-        let mut episode_reward: f64 = 0.;
-        let mut episode_steps: Vec<i64> = vec![];
-        let obs = env.reset(SEED);
+        let mut episode_reward = 0.;
+        let mut episode_steps = vec![];
+        let mut obs = env.reset(SEED);
         loop {
             let obs_v = obs.0;
             let act_probs_v = net.forward(&obs_v);
-            // let obs = env.step(action)
+            let act_sample = sampling_array(&act_probs_v);
+            let mut next_obs = env.step(&act_sample);
+            let obs_value = obs.0;
+            let reward = obs.1;
+            let is_terminated = obs.2;
+            let is_truncated = obs.3;
+            episode_reward += reward;
+            let step = EpisodeStep {
+                observation: obs_value,
+                action: act_sample,
+            };
+            episode_steps.push(step);
+            if is_terminated || is_truncated {
+                let episode = Episode {
+                    reward,
+                    steps: episode_steps.clone(),
+                };
+                if reward > 0. {
+                    batch.push(episode);
+                }
+                episode_reward = 0.;
+                episode_steps.clear();
+                next_obs = env.reset(42);
+                if batch.len() == batch_size {
+                    return batch;
+                }
+            }
+            obs = next_obs;
         }
 
-        batch
     }
 
     pub fn filter_batch(batch: Vec<i64>, percentile: i32) {
