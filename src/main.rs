@@ -4,8 +4,8 @@
 
 use anyhow::Result;
 use once_cell::sync::Lazy;
-use play::play::iterate_batches;
-use policy::policy::PolicyNet;
+use play::play::{filter_batch, iterate_batches};
+use policy::policy::{policy_net, transmute_observation};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use tch::nn;
@@ -22,16 +22,27 @@ mod util;
 
 static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
+const PERCENTILE: i32 = 70;
+
 pub fn run() -> Result<()> {
     let mut env = env::env::BiSRGraphGame::new();
     let vs = nn::VarStore::new(*DEVICE.lock().unwrap());
     let vs_ref_binding = vs.root();
-    let net = PolicyNet::new(&vs_ref_binding);
+    let policy_net = policy_net(&vs_ref_binding);
     let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
 
-    for epoch in 1..1000 {
-        let batch = iterate_batches(&mut env, &net, 128);
-        
+    for epoch in 1..2 {
+        let batch = iterate_batches(&mut env, &policy_net, 2);
+        let (obs_vec, act_vec, reward_bound, reward_mean) = filter_batch(batch, PERCENTILE);
+        opt.zero_grad();
+        let observation = obs_vec
+            .iter()
+            .map(|obs| transmute_observation(obs))
+            .collect::<Vec<Tensor>>();
+        let observation = Tensor::stack(&observation, 0);
+        println!("{:?}", observation);
+
+        // let action_scores = policy_net.forward();
         // let loss = net
         //     .forward(&m.train_x)
         //     .cross_entropy_for_logits(&m.train_labels);

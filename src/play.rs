@@ -5,8 +5,7 @@ pub mod play {
 
     use crate::{
         env::env::{ActionSpace, Env, ObservationSpace},
-        policy::policy::PolicyNet,
-        util::sampling_array,
+        util::sampling_array, policy::policy::{transmute_observation, transmute_action},
     };
 
     const SEED: i64 = 42;
@@ -22,14 +21,16 @@ pub mod play {
         steps: Vec<EpisodeStep>,
     }
 
-    pub fn iterate_batches(env: &mut dyn Env, net: &PolicyNet, batch_size: usize) -> Vec<Episode> {
+    pub fn iterate_batches(env: &mut dyn Env, net: &dyn Module, batch_size: usize) -> Vec<Episode> {
         let mut batch = vec![];
         let mut episode_reward = 0.;
         let mut episode_steps = vec![];
         let mut obs = env.reset(SEED);
         loop {
             let obs_v = obs.0;
-            let act_probs_v = net.forward(&obs_v);
+            let trans_obs_v = transmute_observation(&obs_v);
+            let trans_act_probs_v = net.forward(&trans_obs_v);
+            let act_probs_v = transmute_action(&trans_act_probs_v);
             let act_sample = sampling_array(&act_probs_v);
             let mut next_obs = env.step(&act_sample);
             let obs_value = obs.0;
