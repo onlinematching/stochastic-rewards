@@ -8,6 +8,7 @@ pub mod policy {
     use crate::util::sigmoid;
 
     pub const M: usize = crate::util::M;
+    pub const ALPHA: f64 = 0.5;
 
     pub const fn pow2(n: usize) -> usize {
         1 << n
@@ -16,19 +17,18 @@ pub mod policy {
     pub const LABELS: usize = pow2(M);
 
     pub fn policy_net(vs: &nn::Path) -> impl Module {
-        const HIDDEN_LAYER_1: i64 = pow2(M+2) as i64;
-        const HIDDEN_LAYER_2: i64 = pow2(M+2) as i64;
+        const HIDDEN_LAYER: i64 = pow2(M+2) as i64;
         nn::seq()
             .add(nn::linear(
                 vs / "layer1",
                 (M * M + 1) as i64,
-                HIDDEN_LAYER_1,
+                HIDDEN_LAYER,
                 Default::default(),
             ))
             .add_fn(|xs| xs.relu())
             .add(nn::linear(
                 vs,
-                HIDDEN_LAYER_2,
+                HIDDEN_LAYER,
                 LABELS as i64,
                 Default::default(),
             ))

@@ -1,11 +1,14 @@
-#![allow(dead_code)]
-
 pub mod play {
+    use num_traits::abs;
+    use rand::distributions::{Distribution, Uniform};
+    use rand::Rng;
     use tch::nn::Module;
 
+    use crate::policy::policy::pow2;
+    use crate::util::{index2binary, M};
     use crate::{
         env::env::{ActionSpace, Env, ObservationSpace},
-        policy::policy::{transmute_action, transmute_observation},
+        policy::policy::{transmute_action, transmute_observation, ALPHA},
         util::sampling_array,
     };
 
@@ -25,20 +28,40 @@ pub mod play {
         steps: Vec<EpisodeStep>,
     }
 
+    fn get_debug_graph(obs: &ObservationSpace) {
+        let graph = crate::util::agent_generate_graph(obs);
+        println!("{:?}", graph);
+        println!("ALG = {:?}, OPT = {:?}", graph.ALG(), graph.OPT());
+        println!("rario = {:?}", graph.ALG() / graph.OPT());
+    }
+
     pub fn iterate_batches(env: &mut dyn Env, net: &dyn Module, batch_size: usize) -> Vec<Episode> {
+        let mut rng = rand::thread_rng();
         let mut batch = vec![];
         let mut episode_reward = 0.;
         let mut episode_steps = vec![];
         let mut obs = env.reset(SEED);
         loop {
             let obs_v = obs.0;
-            let trans_obs_v = transmute_observation(&obs_v);
-            let trans_act_probs_v = net.forward(&trans_obs_v);
-            let act_probs_v = transmute_action(&trans_act_probs_v);
-            let act_sample = sampling_array(&act_probs_v);
+            let act_sample;
+            if rng.gen_bool(ALPHA) {
+                let trans_obs_v = transmute_observation(&obs_v);
+                let trans_act_probs_v = net.forward(&trans_obs_v);
+                let act_probs_v = transmute_action(&trans_act_probs_v);
+                act_sample = sampling_array(&act_probs_v);
+            } else {
+                let k = pow2(M);
+                let distribution = Uniform::new(0, k);
+                let random_number = distribution.sample(&mut rng);
+                act_sample = index2binary(random_number);
+            }
             let mut next_obs = env.step(&act_sample);
             let obs_value = next_obs.0;
             let reward = next_obs.1;
+            if abs(reward - 0.60367435) < 0.000001 {
+                get_debug_graph(&obs_value);
+                std::process::abort();
+            }
             let is_terminated = next_obs.2;
             let is_truncated = next_obs.3;
             episode_reward += reward;
@@ -49,10 +72,7 @@ pub mod play {
             episode_steps.push(step);
             if is_terminated || is_truncated {
                 if DEBUG && is_terminated {
-                    let graph = crate::util::agent_generate_graph(&obs_value);
-                    println!("{:?}", graph);
-                    println!("ALG = {:?}, OPT = {:?}", graph.ALG(), graph.OPT());
-                    println!("rario = {:?}", graph.ALG() / graph.OPT());
+                    get_debug_graph(&obs_value);
                 }
                 let episode = Episode {
                     reward: episode_reward,

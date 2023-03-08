@@ -11,7 +11,7 @@ use rand::prelude::*;
 use std::collections::HashMap;
 use tch::Tensor;
 
-pub const M: usize = 6;
+pub const M: usize = 5;
 
 type Index = usize;
 type Weight = f64;
@@ -115,9 +115,8 @@ fn sample_from_softmax(arr: &Array<&f32, Dim<[usize; 1]>>) -> usize {
 }
 
 const LABELS: usize = pow2(M);
-pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
-    let arr = Array::from_iter(r.into_iter());
-    let index = sample_from_softmax(&arr);
+
+pub fn index2binary(index: usize) -> ActionSpace {
     let mut binary = [A::Fail; M];
     for i in 0..M {
         binary[M - 1 - i] = match (index & (1 << i)) != 0 {
@@ -125,8 +124,13 @@ pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
             false => A::Fail,
         };
     }
-
     binary
+}
+
+pub fn sampling_array(r: &[f32; LABELS]) -> ActionSpace {
+    let arr = Array::from_iter(r.into_iter());
+    let index = sample_from_softmax(&arr);
+    index2binary(index)
 }
 
 pub fn percentile(mut data: Vec<f64>, percentile: f64) -> f64 {
