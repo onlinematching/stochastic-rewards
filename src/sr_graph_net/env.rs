@@ -1,6 +1,6 @@
 pub mod env {
     use crate::sr_graph_net::{
-        policy::{self, policy::pow2},
+        policy::policy::pow2,
         util::{agent_generate_graph, check_symmetry_property},
     };
 

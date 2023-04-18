@@ -6,10 +6,8 @@ use crate::sr_graph_net::{
 use libm::{exp, pow};
 use ndarray::{Array, Dim};
 use ndarray_rand::rand_distr::Uniform;
-use rand::distributions::Bernoulli;
 use rand::prelude::*;
 use std::collections::HashMap;
-use tch::Tensor;
 
 pub const M: usize = 3;
 

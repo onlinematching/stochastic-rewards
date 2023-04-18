@@ -5,7 +5,6 @@ pub mod policy {
     use tch::{nn, Tensor};
 
     use crate::sr_graph_net::env::env::{ActionProbabilitySpace, ObservationSpace, A};
-    use crate::sr_graph_net::util::sigmoid;
 
     pub const M: usize = crate::sr_graph_net::util::M;
     pub const ALPHA: f64 = 0.5;
