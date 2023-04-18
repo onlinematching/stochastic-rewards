@@ -1,4 +1,4 @@
-use crate::util::expected_success_distribution;
+use crate::sr_graph_net::util::expected_success_distribution;
 use num::integer::binomial;
 use std::collections::HashMap;
 use std::hash::Hash;

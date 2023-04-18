@@ -2,7 +2,7 @@
 mod tests_net {
     use std::collections::HashMap;
 
-    use crate::{util::expected_success_distribution, bisrgraph};
+    use crate::sr_graph_net::{bisrgraph, util::expected_success_distribution};
 
     #[test]
     fn test1() {
@@ -17,7 +17,7 @@ mod tests_net {
 
     #[test]
     fn test_main() {
-        use crate::util::expected_success_distribution;
+        use crate::sr_graph_net::util::expected_success_distribution;
         use bisrgraph::BiSRGraph;
         let edges = vec![
             ("A", "a"),
@@ -30,13 +30,11 @@ mod tests_net {
         let v_weight = HashMap::from([("a", 1.), ("b", 1.1), ("c", 0.9)]);
         let g = BiSRGraph::from_edge(edges, v_weight);
         println!("{:?}", g);
-    
+
         println!("{:?}", expected_success_distribution(4, 1.));
-    
+
         println!("{:?}", g.ALG() / 3.);
-    
+
         println!("Hello, world!");
     }
-    
-
 }

@@ -1,10 +1,10 @@
 pub mod env {
-    use crate::{
+    use crate::sr_graph_net::{
         policy::{self, policy::pow2},
         util::{agent_generate_graph, check_symmetry_property},
     };
 
-    const M: usize = crate::util::M;
+    const M: usize = crate::sr_graph_net::util::M;
 
     #[derive(PartialEq, Clone, Copy, Debug)]
     pub enum A {

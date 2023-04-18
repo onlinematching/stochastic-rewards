@@ -4,8 +4,8 @@
 
 use anyhow::Result;
 use once_cell::sync::Lazy;
-use play::play::{filter_batch, iterate_batches};
-use policy::policy::{policy_net, transmute_observation};
+use sr_graph_net::play::play::{filter_batch, iterate_batches};
+use sr_graph_net::policy::policy::{policy_net, transmute_observation};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::thread;
@@ -14,21 +14,15 @@ use tch::nn;
 use tch::nn::{Module, OptimizerConfig};
 use tch::Device;
 use tch::Tensor;
-use util::transmute_action_onehot;
-mod bisrgraph;
-mod env;
-mod play;
-mod policy;
-mod test_edge;
-mod test_net;
-mod util;
+use sr_graph_net::util::transmute_action_onehot;
+mod sr_graph_net;
 
 static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
 const PERCENTILE: f64 = 0.3;
 
 pub fn run() -> Result<()> {
-    let mut env = env::env::BiSRGraphGame::new();
+    let mut env = sr_graph_net::env::env::BiSRGraphGame::new();
     let vs = nn::VarStore::new(*DEVICE.lock().unwrap());
     let vs_ref_binding = vs.root();
     let policy_net = policy_net(&vs_ref_binding);

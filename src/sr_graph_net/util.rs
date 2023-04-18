@@ -1,4 +1,4 @@
-use crate::{
+use crate::sr_graph_net::{
     bisrgraph::BiSRGraph,
     env::env::{ActionSpace, ObservationSpace, A},
     policy::policy::pow2,
@@ -11,7 +11,7 @@ use rand::prelude::*;
 use std::collections::HashMap;
 use tch::Tensor;
 
-pub const M: usize = 5;
+pub const M: usize = 3;
 
 type Index = usize;
 type Weight = f64;
@@ -159,7 +159,7 @@ pub fn transmute_action_onehot(act_vec: &ActionSpace) -> i64 {
 #[cfg(test)]
 mod tests_util {
     use super::{sampling_array, M};
-    use crate::{env::env::A, util::percentile};
+    use crate::sr_graph_net::{env::env::A, util::percentile};
 
     #[test]
     fn test() {

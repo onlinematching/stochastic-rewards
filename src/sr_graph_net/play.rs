@@ -4,9 +4,9 @@ pub mod play {
     use rand::Rng;
     use tch::nn::Module;
 
-    use crate::policy::policy::pow2;
-    use crate::util::{index2binary, M};
-    use crate::{
+    use crate::sr_graph_net::policy::policy::pow2;
+    use crate::sr_graph_net::util::{index2binary, M};
+    use crate::sr_graph_net::{
         env::env::{ActionSpace, Env, ObservationSpace},
         policy::policy::{transmute_action, transmute_observation, ALPHA},
         util::sampling_array,
@@ -29,7 +29,7 @@ pub mod play {
     }
 
     fn get_debug_graph(obs: &ObservationSpace) {
-        let graph = crate::util::agent_generate_graph(obs);
+        let graph = crate::sr_graph_net::util::agent_generate_graph(obs);
         println!("{:?}", graph);
         println!("ALG = {:?}, OPT = {:?}", graph.ALG(), graph.OPT());
         println!("rario = {:?}", graph.ALG() / graph.OPT());
@@ -107,7 +107,7 @@ pub mod play {
             .iter()
             .min_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap();
-        let reward_bound = crate::util::percentile(rewards, percentile);
+        let reward_bound = crate::sr_graph_net::util::percentile(rewards, percentile);
 
         let mut train_obs: Vec<ObservationSpace> = Vec::new();
         let mut train_act: Vec<ActionSpace> = Vec::new();

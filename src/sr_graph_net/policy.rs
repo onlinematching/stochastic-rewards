@@ -4,10 +4,10 @@ pub mod policy {
     use tch::nn::Module;
     use tch::{nn, Tensor};
 
-    use crate::env::env::{ActionProbabilitySpace, ObservationSpace, A};
-    use crate::util::sigmoid;
+    use crate::sr_graph_net::env::env::{ActionProbabilitySpace, ObservationSpace, A};
+    use crate::sr_graph_net::util::sigmoid;
 
-    pub const M: usize = crate::util::M;
+    pub const M: usize = crate::sr_graph_net::util::M;
     pub const ALPHA: f64 = 0.5;
 
     pub const fn pow2(n: usize) -> usize {

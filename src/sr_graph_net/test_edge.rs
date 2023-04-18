@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests_edge {
-    use crate::bisrgraph::BiSRGraph;
+    use crate::sr_graph_net::bisrgraph::BiSRGraph;
     use std::collections::HashMap;
 
     #[test]
