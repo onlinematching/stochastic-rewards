@@ -1,4 +1,6 @@
+mod alg_reinforce;
 mod graph_reinforce;
+mod sr_alg_net;
 mod sr_graph_net;
 
 fn main() {
