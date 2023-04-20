@@ -12,9 +12,9 @@ pub type Step = usize;
 pub type Key = usize;
 pub type Load = Prob;
 pub type Rank = i32;
-pub type AdjSpace = bool;
+pub type IsAdj = bool;
 
-pub type ObservationSpace = ();
+pub type ObservationSpace = ([Load; M], [Rank; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 
 pub const ALPHA: f64 = 0.5;
@@ -37,6 +37,7 @@ impl AdapticeAlgGame {
     }
 
     fn get_state(&self) -> ObservationSpace {
+        
         todo!()
     }
 }
