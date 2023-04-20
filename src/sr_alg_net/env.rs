@@ -1,39 +1,28 @@
 use super::util;
+use rand::{seq::SliceRandom, thread_rng};
 
-const M: usize = util::M;
-
-pub struct ActionSpace {
-    value: usize,
-}
-
-pub enum A {
+#[derive(Copy, Clone)]
+pub enum Available {
     Success,
     Unsuccess,
 }
 
 pub type Reward = f64;
 pub type Step = usize;
-pub type LoadSpace = [f64; M];
-pub type RankSpace = [usize; M];
-pub type AvailSpace = [A; M];
+pub type Key = usize;
+pub type Load = f64;
+pub type Rank = i32;
+pub type AdjSpace = bool;
 
-pub type ObservationSpace = (LoadSpace, RankSpace, AvailSpace);
+pub type ObservationSpace = ();
+pub type ActionSpace = usize;
 
-impl ActionSpace {
-    pub fn new(value: usize) -> Result<Self, String> {
-        if value < M {
-            Ok(ActionSpace { value })
-        } else {
-            Err(format!("Value should be in range 0 to {}", M))
-        }
-    }
+pub const ALPHA: f64 = 0.5;
 
-    pub fn get(&self) -> usize {
-        self.value
-    }
+pub struct AdapticeAlgGame {
+    agent_state: ObservationSpace,
+    graph: onlinematching::papers::stochastic_reward::graph::StochasticReward<Key>,
 }
-
-
 
 pub trait Env {
     fn reset(&mut self, seed: i64) -> (ObservationSpace, Reward, bool, bool);
@@ -42,3 +31,18 @@ pub trait Env {
     fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool);
 }
 
+impl AdapticeAlgGame {
+    fn generate_random_sr() {
+        
+    }
+}
+
+impl Env for AdapticeAlgGame {
+    fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
+        todo!()
+    }
+
+    fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
+        todo!()
+    }
+}
