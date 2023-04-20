@@ -1,4 +1,5 @@
 use super::util;
+use onlinematching::papers::stochastic_reward::graph::{Prob, StochasticReward};
 use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Copy, Clone)]
@@ -10,7 +11,7 @@ pub enum Available {
 pub type Reward = f64;
 pub type Step = usize;
 pub type Key = usize;
-pub type Load = f64;
+pub type Load = Prob;
 pub type Rank = i32;
 pub type AdjSpace = bool;
 
@@ -32,8 +33,8 @@ pub trait Env {
 }
 
 impl AdapticeAlgGame {
-    fn generate_random_sr() {
-        
+    fn generate_random_sr() -> StochasticReward<Key> {
+        todo!()
     }
 }
 
