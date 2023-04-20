@@ -1,5 +1,6 @@
-use super::env::{Rank, AdjSpace};
+use super::env::{AdjSpace, Rank};
 use super::util;
+use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
 use onlinematching::papers::stochastic_reward::graph::{OfflineInfo, Prob};
 use rand::seq::SliceRandom;
@@ -37,6 +38,10 @@ pub struct AwesomeAlg {
 
 impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
     fn init(l: OfflineInfo) -> Self {
+        assert_eq!(
+            l, M,
+            "This AdaptiveAlgorithm now only available for hyperparameter M length U"
+        );
         let mut offline_nodes_available = Vec::with_capacity(l);
         offline_nodes_available.resize(l, true);
         let mut offline_nodes_loads: Vec<Prob> = Vec::with_capacity(l);
@@ -54,6 +59,11 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
+        let available_offline_nodes = get_available_offline_nodes_in_weighted_onlineadj(
+            &self.offline_nodes_available,
+            online_adjacent,
+        );
+
         todo!()
     }
 

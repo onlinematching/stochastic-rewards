@@ -1,6 +1,5 @@
-use super::util;
+use super::util::M;
 use onlinematching::papers::stochastic_reward::graph::{Prob, StochasticReward};
-use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Copy, Clone)]
 pub enum Available {
@@ -21,8 +20,8 @@ pub type ActionSpace = usize;
 pub const ALPHA: f64 = 0.5;
 
 pub struct AdapticeAlgGame {
-    agent_state: ObservationSpace,
-    graph: onlinematching::papers::stochastic_reward::graph::StochasticReward<Key>,
+    online_graph: StochasticReward<Key>,
+    adaptive_alg: super::awesome_alg::AwesomeAlg,
 }
 
 pub trait Env {
@@ -36,11 +35,17 @@ impl AdapticeAlgGame {
     fn generate_random_sr() -> StochasticReward<Key> {
         todo!()
     }
+
+    fn get_state(&self) -> ObservationSpace {
+        todo!()
+    }
 }
 
 impl Env for AdapticeAlgGame {
     fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
-        todo!()
+        let graph = Self::generate_random_sr();
+
+        (self.get_state(), 0., false, false)
     }
 
     fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
