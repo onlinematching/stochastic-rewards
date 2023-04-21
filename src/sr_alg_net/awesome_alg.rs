@@ -1,4 +1,4 @@
-use super::env::{IsAdj, Rank, ObservationSpace};
+use super::env::{IsAdj, Rank, ObservationSpace, Load, RankTrans};
 use super::util;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
@@ -36,6 +36,39 @@ pub struct AwesomeAlg {
     pub offline_nodes_loads: Vec<Prob>,
 }
 
+impl AwesomeAlg {
+    pub fn get_state(&self, online_adjacent: &Vec<(usize, Prob)>) -> ObservationSpace {
+        let mut load = [Load::default(); M];
+        let mut rank = [RankTrans::default(); M];
+        let mut prob = [Prob::default(); M];
+        let mut adj_avail = [true; M];
+
+        let available_offline_nodes: Vec<(usize, f64)> =
+            get_available_offline_nodes_in_weighted_onlineadj(
+                &self.offline_nodes_available,
+                online_adjacent,
+            );
+        let rank_vec = self
+            .offline_nodes_rank
+            .iter()
+            .map(|&a| a as f64 / M as f64)
+            .collect::<Vec<f64>>();
+        let mut adj_avail_vec = vec![false; M];
+        let mut prob_vec: Vec<f64> = vec![0.; M];
+        for (i, p) in available_offline_nodes {
+            adj_avail_vec[i] = true;
+            prob_vec[i] = p;
+        }
+        for i in 0..M {
+            load[i] = self.offline_nodes_loads[i];
+            rank[i] = rank_vec[i];
+            prob[i] = prob_vec[i];
+            adj_avail[i] = adj_avail_vec[i]
+        }
+        (load, rank, prob, adj_avail)
+    }
+}
+
 impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
     fn init(l: OfflineInfo) -> Self {
         assert_eq!(
@@ -59,28 +92,8 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
-        let available_offline_nodes: Vec<(usize, f64)> =
-            get_available_offline_nodes_in_weighted_onlineadj(
-                &self.offline_nodes_available,
-                online_adjacent,
-            );
-        let rank_transmute = self
-            .offline_nodes_rank
-            .iter()
-            .map(|&a| a as f64 / M as f64)
-            .collect::<Vec<f64>>();
-        let mut nodes_available = vec![0.; M];
-        let mut probs = vec![0.; M];
-        for (i, p) in available_offline_nodes {
-            nodes_available[i] = 1.;
-            probs[i] = p;
-        }
-        let mut obs_transmute: Vec<f64> = Vec::new();
-        obs_transmute.extend(&self.offline_nodes_loads);
-        obs_transmute.extend(&rank_transmute);
-        obs_transmute.extend(&probs);
-        obs_transmute.extend(&nodes_available);
-        let obs_tensor = Tensor::of_slice(&obs_transmute);
+        
+        
 
         todo!()
     }

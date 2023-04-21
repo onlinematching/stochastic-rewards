@@ -1,5 +1,8 @@
-use super::util::M;
-use onlinematching::papers::stochastic_reward::graph::{Prob, StochasticReward};
+use super::{awesome_alg::AwesomeAlg, util::M};
+use onlinematching::papers::{
+    adwords::util::get_available_offline_nodes_in_weighted_onlineadj,
+    stochastic_reward::graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
+};
 
 #[derive(Copy, Clone)]
 pub enum Available {
@@ -12,9 +15,10 @@ pub type Step = usize;
 pub type Key = usize;
 pub type Load = Prob;
 pub type Rank = i32;
+pub type RankTrans = f64;
 pub type IsAdj = bool;
 
-pub type ObservationSpace = ([Load; M], [Rank; M], [Prob; M], [IsAdj; M]);
+pub type ObservationSpace = ([Load; M], [RankTrans; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 
 pub const ALPHA: f64 = 0.5;
@@ -37,11 +41,10 @@ impl AdapticeAlgGame {
         todo!()
     }
 
-    fn get_state(&self) -> ObservationSpace {
-        
-        
-        todo!()
+    fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
+        self.online_graph.weighted_bigraph.v_adjacency_list[self.step].clone()
     }
+
 }
 
 impl Env for AdapticeAlgGame {
@@ -49,8 +52,10 @@ impl Env for AdapticeAlgGame {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
         self.step = 0;
+        self.adaptive_alg = AwesomeAlg::init(M);
+        let adj = self.get_online_adjacent();
 
-        (self.get_state(), 0., false, false)
+        (self.adaptive_alg. get_state(&adj), 0., false, false)
     }
 
     fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
