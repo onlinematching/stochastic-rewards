@@ -22,6 +22,7 @@ pub const ALPHA: f64 = 0.5;
 pub struct AdapticeAlgGame {
     online_graph: StochasticReward<Key>,
     adaptive_alg: super::awesome_alg::AwesomeAlg,
+    step: usize,
 }
 
 pub trait Env {
@@ -38,6 +39,7 @@ impl AdapticeAlgGame {
 
     fn get_state(&self) -> ObservationSpace {
         
+        
         todo!()
     }
 }
@@ -45,6 +47,8 @@ impl AdapticeAlgGame {
 impl Env for AdapticeAlgGame {
     fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
         let graph = Self::generate_random_sr();
+        self.online_graph = graph;
+        self.step = 0;
 
         (self.get_state(), 0., false, false)
     }

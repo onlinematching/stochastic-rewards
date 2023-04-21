@@ -1,4 +1,4 @@
-use super::env::{IsAdj, Rank};
+use super::env::{IsAdj, Rank, ObservationSpace};
 use super::util;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
@@ -80,6 +80,7 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
         obs_transmute.extend(&rank_transmute);
         obs_transmute.extend(&probs);
         obs_transmute.extend(&nodes_available);
+        let obs_tensor = Tensor::of_slice(&obs_transmute);
 
         todo!()
     }
