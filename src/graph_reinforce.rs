@@ -16,11 +16,11 @@ pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available(
 const PERCENTILE: f64 = 0.3;
 
 pub fn run() -> Result<()> {
-    let mut env = crate::sr_graph_net::env::env::BiSRGraphGame::new();
-    let vs = nn::VarStore::new(*DEVICE.lock().unwrap());
-    let vs_ref_binding = vs.root();
+    let mut env: crate::sr_graph_net::env::env::BiSRGraphGame = crate::sr_graph_net::env::env::BiSRGraphGame::new();
+    let vs: nn::VarStore = nn::VarStore::new(*DEVICE.lock().unwrap());
+    let vs_ref_binding: nn::Path = vs.root();
     let policy_net = policy_net(&vs_ref_binding);
-    let mut opt = nn::Adam::default().build(&vs, 1e-3)?;
+    let mut opt: nn::Optimizer = nn::Adam::default().build(&vs, 1e-3)?;
 
     for epoch in 1..10000 {
         let batch = iterate_batches(&mut env, &policy_net, 1024);

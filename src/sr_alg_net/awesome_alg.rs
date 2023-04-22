@@ -1,15 +1,26 @@
-use super::env::{IsAdj, Rank, ObservationSpace, Load, RankTrans};
+use super::env::{IsAdj, Load, ObservationSpace, Rank, RankTrans};
 use super::util;
+use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
 use onlinematching::papers::stochastic_reward::graph::{OfflineInfo, Prob};
 use rand::seq::SliceRandom;
 use rand::thread_rng;
-use tch::nn::Module;
+use std::sync::Mutex;
+use std::thread;
+use tch::nn::{Module, OptimizerConfig};
+use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
 pub const LABELS: usize = M;
+
+pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
+pub static VS: Lazy<Mutex<nn::VarStore>> =
+    Lazy::new(|| nn::VarStore::new(*DEVICE.lock().unwrap()).into());
+
+pub static VS_REF: Lazy<Mutex<nn::Path>> = Lazy::new(|| *VS.lock().unwrap().root().into());
+
 
 pub fn policy_net(vs: &nn::Path) -> impl Module {
     const HIDDEN_LAYER: i64 = util::pow2(M + 3) as i64;
@@ -92,8 +103,9 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
-        
-        
+        let obs = self.get_state(online_adjacent);
+        let obs_tensor = util::transmute_obs(obs);
+        // let action_raw_tensor = ;
 
         todo!()
     }
