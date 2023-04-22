@@ -447,9 +447,9 @@ checksum = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3"
 
 [[package]]
 name = "onlinematching"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0605bd06761841a8b4fd1401429cdea9c416ad1c95d567f974268a3515de536d"
+checksum = "2eb47086fd3fdc3842403038704c7e85aca101c7e9cbc4b79ca309d334a8f1fa"
 dependencies = [
  "ndarray",
  "ndarray-rand",

@@ -19,9 +19,6 @@ pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available(
 pub static VS: Lazy<Mutex<nn::VarStore>> =
     Lazy::new(|| nn::VarStore::new(*DEVICE.lock().unwrap()).into());
 
-pub static VS_REF: Lazy<Mutex<nn::Path>> = Lazy::new(|| *VS.lock().unwrap().root().into());
-
-
 pub fn policy_net(vs: &nn::Path) -> impl Module {
     const HIDDEN_LAYER: i64 = util::pow2(M + 3) as i64;
     nn::seq()
@@ -40,11 +37,12 @@ pub fn policy_net(vs: &nn::Path) -> impl Module {
         ))
 }
 
-#[derive(Debug)]
 pub struct AwesomeAlg {
     pub offline_nodes_available: Vec<IsAdj>,
     pub offline_nodes_rank: Vec<Rank>,
     pub offline_nodes_loads: Vec<Prob>,
+    // deep neural network
+    pub policy_net: Box<dyn Module>,
 }
 
 impl AwesomeAlg {
@@ -95,17 +93,24 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
             offline_nodes_rank.push(i as i32)
         }
         offline_nodes_rank.shuffle(&mut thread_rng());
+
+        // Network initial
+        let binding: std::sync::MutexGuard<nn::VarStore> = VS.lock().unwrap();
+        let vs_ref: nn::Path = binding.root();
+        let policy_net = policy_net(&vs_ref);
+
         AwesomeAlg {
             offline_nodes_available,
             offline_nodes_rank,
             offline_nodes_loads,
+            policy_net: Box::new(policy_net),
         }
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs = self.get_state(online_adjacent);
-        let obs_tensor = util::transmute_obs(obs);
-        // let action_raw_tensor = ;
+        let obs_tensor: Tensor = util::transmute_obs(obs);
+        let action_raw_tensor = self.policy_net.forward(&obs_tensor);
 
         todo!()
     }
