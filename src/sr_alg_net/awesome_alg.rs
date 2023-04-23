@@ -1,3 +1,5 @@
+use crate::sr_alg_net::util::transmute_act;
+
 use super::env::{IsAdj, Load, ObservationSpace, Rank, RankTrans};
 use super::util;
 use once_cell::sync::Lazy;
@@ -111,7 +113,8 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
         let obs = self.get_state(online_adjacent);
         let obs_tensor: Tensor = util::transmute_obs(obs);
         let action_raw_tensor = self.policy_net.forward(&obs_tensor);
-
+        let action_prob = transmute_act(&action_raw_tensor).0;
+        
         todo!()
     }
 

@@ -20,6 +20,7 @@ pub type IsAdj = bool;
 
 pub type ObservationSpace = ([Load; M], [RankTrans; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
+pub type ActionProbSpace = ([Prob; M],);
 
 pub const ALPHA: f64 = 0.5;
 
