@@ -6,6 +6,8 @@ use tch::nn::Module;
 
 use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
 
+type Reward = f64;
+
 const SEED: i64 = 42;
 const DEBUG: bool = false;
 
@@ -17,7 +19,7 @@ pub struct EpisodeStep {
 
 #[derive(Debug)]
 pub struct Episode {
-    reward: f64,
+    reward: Reward,
     steps: Vec<EpisodeStep>,
 }
 
@@ -47,7 +49,7 @@ pub fn iterate_batches(
                 reward: episode_reward,
                 steps: episode_steps.clone(),
             };
-            if reward > 0. || !is_truncated  {
+            if reward > 0. || !is_truncated {
                 batch.push(episode);
             };
             episode_reward = 0.;
@@ -59,4 +61,17 @@ pub fn iterate_batches(
         }
         obs_old = obs_new;
     }
+}
+
+pub fn filter_batch(
+    batch: Vec<Episode>,
+    percentile: f64,
+) -> (
+    Vec<ObservationSpace>,
+    Vec<ActionSpace>,
+    Reward,
+    Reward,
+    Reward,
+) {
+    todo!()
 }

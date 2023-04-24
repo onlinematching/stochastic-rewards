@@ -32,7 +32,7 @@ pub fn run() -> Result<()> {
             .iter()
             .map(|obs| transmute_observation(obs))
             .collect::<Vec<Tensor>>();
-        let observation = Tensor::stack(&observation, 0);
+        let observation: Tensor = Tensor::stack(&observation, 0);
         // observation.print();
         println!("{:?}", observation.size());
         let action = act_vec
@@ -41,9 +41,9 @@ pub fn run() -> Result<()> {
             .collect::<Vec<i64>>();
         let action = Tensor::of_slice(&action);
         // action.print();
-        let action_scores = policy_net.forward(&observation);
+        let action_scores: Tensor = policy_net.forward(&observation);
         // action_scores.print();
-        let loss = action_scores.cross_entropy_for_logits(&action);
+        let loss: Tensor = action_scores.cross_entropy_for_logits(&action);
         println!(
             "reward_lowest = {:?}, reward_bound = {:?}, reward_mean = {:?}",
             reward_lowest, reward_bound, reward_mean

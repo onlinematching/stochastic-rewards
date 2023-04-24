@@ -11,4 +11,10 @@ fn main() {
             panic!("{:?}", e)
         }
     };
+    match alg_reinforce::run() {
+        Ok(_) => {}
+        Err(e) => {
+            panic!("{:?}", e)
+        }
+    };
 }
