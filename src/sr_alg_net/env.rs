@@ -21,9 +21,10 @@ pub type IsAdj = bool;
 pub type ObservationSpace = ([Load; M], [RankTrans; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
-pub type Space = (ObservationSpace, ActionSpace);
+pub type Space = (ObservationSpace, Option<ActionSpace>);
 
 pub const ALPHA: f64 = 0.5;
+pub const PRECISION: usize = 1000;
 
 pub struct AdapticeAlgGame {
     pub online_graph: StochasticReward<Key>,
@@ -44,14 +45,29 @@ impl AdapticeAlgGame {
         todo!()
     }
 
-    pub fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
+    fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
         self.online_graph.weighted_bigraph.v_adjacency_list[self.step].clone()
     }
 
-    pub fn normal_alg_ratio_geometric_mean(&self, precision: usize) -> f64 {
+    fn normal_alg_ratio_geometric_mean(&self, precision: usize) -> f64 {
         let ratio_ranking = self.online_graph.adaptive_ALG::<Ranking>(precision);
         let ratio_balance = self.online_graph.adaptive_ALG::<Balance>(precision);
         (ratio_ranking * ratio_balance).sqrt()
+    }
+
+    fn get_ratio(&self) -> f64 {
+        let mut alg_sum: f64 = 0.;
+        let net: Option<Arc<dyn Module>> = self.adaptive_alg.policy_net.clone();
+        for _ in 0..PRECISION {
+            let mut alg = AwesomeAlg::init((M, net.clone()));
+            for online_adj in self.online_graph.iter() {
+                let alg_choose = alg.dispatch(online_adj);
+                alg.query_success(alg_choose);
+            }
+
+            alg_sum += alg.alg_output();
+        }
+        alg_sum / PRECISION as f64
     }
 }
 
@@ -68,7 +84,21 @@ impl AdapticeAlgGame {
     pub fn step(&mut self) -> (Space, Reward, bool, bool) {
         let online_adj = self.get_online_adjacent();
         let alg_choose = self.adaptive_alg.dispatch(&online_adj);
+        let obs: ObservationSpace = self.adaptive_alg.get_state(&online_adj);
         self.adaptive_alg.query_success(alg_choose);
-        todo!()
+        self.step += 1;
+        match alg_choose {
+            Some((action, _prob)) => {
+                if self.step == M {
+                    let ratio_contrast = self.normal_alg_ratio_geometric_mean(PRECISION);
+                    let true_ratio = self.get_ratio();
+                    let reward = true_ratio / ratio_contrast;
+                    ((obs, Some(action)), reward, true, false)
+                } else {
+                    ((obs, Some(action)), 0., false, false)
+                }
+            }
+            None => ((obs, None), 0., false, true),
+        }
     }
 }

@@ -12,7 +12,7 @@ const DEBUG: bool = false;
 #[derive(Clone, Debug)]
 pub struct EpisodeStep {
     observation: ObservationSpace,
-    action: ActionSpace,
+    action: Option<ActionSpace>,
 }
 
 #[derive(Debug)]
@@ -47,7 +47,7 @@ pub fn iterate_batches(
                 reward: episode_reward,
                 steps: episode_steps.clone(),
             };
-            if reward > 0. {
+            if reward > 0. || !is_truncated  {
                 batch.push(episode);
             };
             episode_reward = 0.;

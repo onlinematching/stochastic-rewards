@@ -37,6 +37,7 @@ pub fn policy_net(vs: &nn::Path) -> impl Module {
         ))
 }
 
+#[derive(Debug)]
 pub struct AwesomeAlg {
     pub offline_nodes_available: Vec<IsAdj>,
     pub offline_nodes_rank: Vec<Rank>,
@@ -103,14 +104,15 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
-        let obs = self.get_state(online_adjacent);
+        let obs: ObservationSpace = self.get_state(online_adjacent);
         let obs_tensor: Tensor = util::transmute_obs(obs);
         let action_raw_tensor = self.policy_net.clone().unwrap().forward(&obs_tensor);
         let action_prob = transmute_act(&action_raw_tensor).0;
         let action = sample_from_softmax(&action_prob);
         let probs = obs.2;
         let prob: f64 = probs[action];
-        if prob > 0. {
+        let is_adj = obs.3;
+        if is_adj[action] {
             Some((action, prob))
         } else {
             None
