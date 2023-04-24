@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::sr_alg_net::env::Space;
-use onlinematching::papers::stochastic_reward::graph::Prob;
 use tch::nn::Module;
 
 use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
@@ -9,7 +8,6 @@ use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
 type Reward = f64;
 
 const SEED: i64 = 42;
-const DEBUG: bool = false;
 
 #[derive(Clone, Debug)]
 pub struct EpisodeStep {

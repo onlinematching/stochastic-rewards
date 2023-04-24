@@ -23,7 +23,6 @@ pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
 pub type Space = (ObservationSpace, Option<ActionSpace>);
 
-pub const ALPHA: f64 = 0.5;
 pub const PRECISION: usize = 1000;
 
 pub struct AdapticeAlgGame {
@@ -36,13 +35,13 @@ impl AdapticeAlgGame {
     pub fn new() -> AdapticeAlgGame {
         Self {
             online_graph: WBigraph::new().into_stochastic_reward(),
-            adaptive_alg: AwesomeAlg::init((0, None)),
+            adaptive_alg: AwesomeAlg::init((M, None)),
             step: usize::MAX,
         }
     }
 
     pub fn generate_random_sr() -> StochasticReward<Key> {
-        todo!()
+        onlinematching::papers::stochastic_reward::mp12::example::gk(3, 20)
     }
 
     fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
@@ -93,6 +92,7 @@ impl AdapticeAlgGame {
                     let ratio_contrast = self.normal_alg_ratio_geometric_mean(PRECISION);
                     let true_ratio = self.get_ratio();
                     let reward = true_ratio / ratio_contrast;
+                    println!("{ratio_contrast}, {true_ratio}, {reward}");
                     ((obs, Some(action)), reward, true, false)
                 } else {
                     ((obs, Some(action)), 0., false, false)
