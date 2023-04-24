@@ -11,10 +11,10 @@ pub const fn pow2(n: usize) -> usize {
 }
 
 pub fn transmute_obs(obs: ObservationSpace) -> Tensor {
-    let mut obs_transmute: Vec<f64> = Vec::new();
-    obs_transmute.extend(obs.0);
-    obs_transmute.extend(obs.1);
-    obs_transmute.extend(obs.2);
+    let mut obs_transmute: Vec<f32> = Vec::new();
+    obs_transmute.extend(obs.0.iter().map(|&a| a as f32));
+    obs_transmute.extend(obs.1.iter().map(|&a| a as f32));
+    obs_transmute.extend(obs.2.iter().map(|&a| a as f32));
     obs_transmute.extend(obs.3.map(|a| match a {
         true => 1.,
         false => 0.,

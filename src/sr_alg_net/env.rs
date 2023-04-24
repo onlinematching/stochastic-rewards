@@ -23,6 +23,7 @@ pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
 pub type Space = (ObservationSpace, Option<ActionSpace>);
 
+pub const DEBUG: bool = true;
 pub const PRECISION: usize = 1000;
 
 pub struct AdapticeAlgGame {
@@ -48,13 +49,16 @@ impl AdapticeAlgGame {
         self.online_graph.weighted_bigraph.v_adjacency_list[self.step].clone()
     }
 
-    fn normal_alg_ratio_geometric_mean(&self, precision: usize) -> f64 {
-        let ratio_ranking = self.online_graph.adaptive_ALG::<Ranking>(precision);
-        let ratio_balance = self.online_graph.adaptive_ALG::<Balance>(precision);
-        (ratio_ranking * ratio_balance).sqrt()
+    fn normal_alg_geometric_mean(&self, precision: usize) -> f64 {
+        let alg_ranking = self.online_graph.adaptive_ALG::<Ranking>(precision);
+        let alg_balance = self.online_graph.adaptive_ALG::<Balance>(precision);
+        if DEBUG {
+            println!("alg_ranking = {alg_ranking}, alg_balance = {alg_balance}");
+        }
+        (alg_ranking * alg_balance).sqrt()
     }
 
-    fn get_ratio(&self) -> f64 {
+    fn get_alg(&self) -> f64 {
         let mut alg_sum: f64 = 0.;
         let net: Option<Arc<dyn Module>> = self.adaptive_alg.policy_net.clone();
         for _ in 0..PRECISION {
@@ -89,10 +93,12 @@ impl AdapticeAlgGame {
         match alg_choose {
             Some((action, _prob)) => {
                 if self.step == M {
-                    let ratio_contrast = self.normal_alg_ratio_geometric_mean(PRECISION);
-                    let true_ratio = self.get_ratio();
+                    let ratio_contrast = self.normal_alg_geometric_mean(PRECISION) / M as f64;
+                    let true_ratio = self.get_alg() / M as f64;
                     let reward = true_ratio / ratio_contrast;
-                    println!("{ratio_contrast}, {true_ratio}, {reward}");
+                    if DEBUG {
+                        println!("ratio_contrast = {ratio_contrast}, true_ratio = {true_ratio}, reward = {reward}");
+                    }
                     ((obs, Some(action)), reward, true, false)
                 } else {
                     ((obs, Some(action)), 0., false, false)
