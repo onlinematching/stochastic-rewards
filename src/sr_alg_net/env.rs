@@ -1,14 +1,12 @@
 use super::{awesome_alg::AwesomeAlg, util::M};
-use onlinematching::papers::{
-    adwords::util::get_available_offline_nodes_in_weighted_onlineadj,
-    stochastic_reward::graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
+use onlinematching::{
+    papers::stochastic_reward::{
+        graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
+        mp12::Balance,
+        ranking::Ranking,
+    },
+    weightedbigraph::WBigraph,
 };
-
-#[derive(Copy, Clone)]
-pub enum Available {
-    Success,
-    Unsuccess,
-}
 
 pub type Reward = f64;
 pub type Step = usize;
@@ -38,28 +36,45 @@ pub trait Env {
 }
 
 impl AdapticeAlgGame {
-    fn generate_random_sr() -> StochasticReward<Key> {
+    pub fn new() -> AdapticeAlgGame {
+        let bg = WBigraph::new();
+        Self {
+            online_graph: bg.into_stochastic_reward(),
+            adaptive_alg: AwesomeAlg::init(0),
+            step: usize::MAX,
+        }
+    }
+
+    pub fn generate_random_sr() -> StochasticReward<Key> {
         todo!()
     }
 
-    fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
+    pub fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
         self.online_graph.weighted_bigraph.v_adjacency_list[self.step].clone()
     }
 
+    pub fn normal_alg_ratio_geometric_mean(&self, precision: usize) -> f64 {
+        let ratio_ranking = self.online_graph.adaptive_ALG::<Ranking>(precision);
+        let ratio_balance = self.online_graph.adaptive_ALG::<Balance>(precision);
+        (ratio_ranking * ratio_balance).sqrt()
+    }
 }
 
 impl Env for AdapticeAlgGame {
     fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
-        self.step = 0;
+        self.step = Step::default();
         self.adaptive_alg = AwesomeAlg::init(M);
         let adj = self.get_online_adjacent();
 
-        (self.adaptive_alg. get_state(&adj), 0., false, false)
+        (self.adaptive_alg.get_state(&adj), 0., false, false)
     }
 
     fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
+        let online_adj = self.get_online_adjacent();
+        let alg_choose = self.adaptive_alg.dispatch(&online_adj);
+        self.adaptive_alg.query_success(alg_choose);
         todo!()
     }
 }

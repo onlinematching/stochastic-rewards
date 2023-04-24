@@ -1,4 +1,4 @@
-use crate::sr_alg_net::util::{transmute_act, sample_from_softmax};
+use crate::sr_alg_net::util::{sample_from_softmax, transmute_act};
 
 use super::env::{IsAdj, Load, ObservationSpace, Rank, RankTrans};
 use super::util;
@@ -9,8 +9,7 @@ use onlinematching::papers::stochastic_reward::graph::{OfflineInfo, Prob};
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
 use std::sync::Mutex;
-use std::thread;
-use tch::nn::{Module, OptimizerConfig};
+use tch::nn::Module;
 use tch::Device;
 use tch::{nn, Tensor};
 

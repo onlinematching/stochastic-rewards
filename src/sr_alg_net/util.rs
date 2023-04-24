@@ -1,8 +1,7 @@
-use super::env::{ActionProbSpace, ActionSpace, ObservationSpace};
-use ndarray::{Array, Dim};
+use super::env::{ActionProbSpace, ObservationSpace};
+use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
-use rand::prelude::*;
 use tch::Tensor;
 
 pub const M: usize = 3;
