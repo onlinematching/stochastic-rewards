@@ -73,5 +73,32 @@ pub fn filter_batch(
     Reward,
     Reward,
 ) {
-    todo!()
+    assert!(0. <= percentile && percentile <= 100.);
+    let rewards = batch
+        .iter()
+        .map(|episode| episode.reward)
+        .collect::<Vec<f64>>();
+    let reward_mean = rewards.iter().sum::<f64>() / rewards.len() as f64;
+    let reward_lowest = *rewards
+        .iter()
+        .min_by(|a, b| a.partial_cmp(b).unwrap())
+        .unwrap();
+    let reward_bound = crate::sr_graph_net::util::percentile(rewards, percentile);
+
+    let mut train_obs: Vec<ObservationSpace> = Vec::new();
+    let mut train_act: Vec<ActionSpace> = Vec::new();
+    for Episode { reward, ref steps } in batch {
+        if reward > reward_bound {
+            continue;
+        }
+        train_obs.extend(steps.iter().map(|step| step.observation));
+        train_act.extend(steps.iter().map(|step| step.action.unwrap()));
+    }
+    return (
+        train_obs,
+        train_act,
+        reward_bound,
+        reward_mean,
+        reward_lowest,
+    );
 }
