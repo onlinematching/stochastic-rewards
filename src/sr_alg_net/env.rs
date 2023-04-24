@@ -1,9 +1,12 @@
 use super::{awesome_alg::AwesomeAlg, util::M};
-use onlinematching::{papers::stochastic_reward::{
-    graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
-    mp12::Balance,
-    ranking::Ranking,
-}, weightedbigraph::WBigraph};
+use onlinematching::{
+    papers::stochastic_reward::{
+        graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
+        mp12::Balance,
+        ranking::Ranking,
+    },
+    weightedbigraph::WBigraph,
+};
 use std::sync::Arc;
 use tch::nn::Module;
 
@@ -53,18 +56,13 @@ impl AdapticeAlgGame {
 }
 
 impl AdapticeAlgGame {
-    pub fn reset(
-        &mut self,
-        policy_net: Arc<dyn Module>,
-        _seed: i64,
-    ) -> (ObservationSpace, Reward, bool, bool) {
+    pub fn reset(&mut self, policy_net: Arc<dyn Module>, _seed: i64) -> ObservationSpace {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
         self.step = Step::default();
         self.adaptive_alg = AwesomeAlg::init((M, Some(policy_net)));
         let adj = self.get_online_adjacent();
-
-        (self.adaptive_alg.get_state(&adj), 0., false, false)
+        self.adaptive_alg.get_state(&adj)
     }
 
     pub fn step(&mut self) -> (Space, Reward, bool, bool) {

@@ -29,13 +29,11 @@ pub fn iterate_batches(
     let mut batch: Vec<Episode> = vec![];
     let mut episode_reward: f64 = 0.;
     let mut episode_steps: Vec<EpisodeStep> = vec![];
-    let mut obs: (ObservationSpace, f64, bool, bool) = game.reset(net.clone(), SEED);
+    let mut obs_old: ObservationSpace = game.reset(net.clone(), SEED);
     loop {
-        let obs_old = obs.0;
-        let online_adjacent = game.get_online_adjacent();
         let info: (Space, f64, bool, bool) = game.step();
-        let space = info.0;
-        let (obs_new, action) = space;
+        let space: Space = info.0;
+        let (mut obs_new, action) = space;
         let reward = info.1;
         let is_terminated = info.2;
         let is_truncated = info.3;
@@ -44,6 +42,21 @@ pub fn iterate_batches(
             observation: obs_old,
             action,
         });
-        todo!()
+        if is_terminated || is_truncated {
+            let episode: Episode = Episode {
+                reward: episode_reward,
+                steps: episode_steps.clone(),
+            };
+            if reward > 0. {
+                batch.push(episode);
+            };
+            episode_reward = 0.;
+            episode_steps.clear();
+            obs_new = game.reset(net.clone(), 42);
+            if batch.len() == batch_size {
+                return batch;
+            }
+        }
+        obs_old = obs_new;
     }
 }
