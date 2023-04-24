@@ -1,4 +1,4 @@
-use crate::sr_alg_net::util::transmute_act;
+use crate::sr_alg_net::util::{transmute_act, sample_from_softmax};
 
 use super::env::{IsAdj, Load, ObservationSpace, Rank, RankTrans};
 use super::util;
@@ -7,7 +7,7 @@ use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weight
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
 use onlinematching::papers::stochastic_reward::graph::{OfflineInfo, Prob};
 use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::{thread_rng, Rng};
 use std::sync::Mutex;
 use std::thread;
 use tch::nn::{Module, OptimizerConfig};
@@ -114,15 +114,38 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
         let obs_tensor: Tensor = util::transmute_obs(obs);
         let action_raw_tensor = self.policy_net.forward(&obs_tensor);
         let action_prob = transmute_act(&action_raw_tensor).0;
-        
-        todo!()
+        let action = sample_from_softmax(&action_prob);
+        let probs = obs.2;
+        let prob: f64 = probs[action];
+        if prob > 0. {
+            Some((action, prob))
+        } else {
+            None
+        }
     }
 
     fn query_success(self: &mut Self, offline_node: Option<(usize, Prob)>) -> Option<bool> {
-        todo!()
+        match offline_node {
+            Some(adj_info) => {
+                let mut rng = rand::thread_rng();
+                let prob = adj_info.1;
+                let result = rng.gen_bool(prob);
+                if result {
+                    self.offline_nodes_available[adj_info.0] = false;
+                }
+                Some(result)
+            }
+            None => None,
+        }
     }
 
     fn alg_output(self: Self) -> f64 {
-        todo!()
+        self.offline_nodes_available
+            .iter()
+            .map(|&avail| match avail {
+                true => 0,
+                false => 1,
+            })
+            .sum::<i32>() as f64
     }
 }

@@ -32,7 +32,7 @@ pub fn transmute_act(action: &Tensor) -> ActionProbSpace {
     (action,)
 }
 
-fn sample_from_softmax(r: &[Prob; M]) -> usize {
+pub fn sample_from_softmax(r: &[Prob; M]) -> usize {
     let arr = Array::from_iter(r.into_iter());
     let mut rng = rand::thread_rng();
     let mut probabilities = arr.mapv(|x| x.exp());
