@@ -36,10 +36,10 @@ pub mod play {
     }
 
     pub fn iterate_batches(env: &mut dyn Env, net: &dyn Module, batch_size: usize) -> Vec<Episode> {
-        let mut rng = rand::thread_rng();
-        let mut batch = vec![];
-        let mut episode_reward = 0.;
-        let mut episode_steps = vec![];
+        let mut rng: rand::rngs::ThreadRng = rand::thread_rng();
+        let mut batch: Vec<Episode> = vec![];
+        let mut episode_reward: f64 = 0.;
+        let mut episode_steps: Vec<EpisodeStep> = vec![];
         let mut obs = env.reset(SEED);
         loop {
             let obs_v = obs.0;
@@ -51,8 +51,8 @@ pub mod play {
                 act_sample = sampling_array(&act_probs_v);
             } else {
                 let k = pow2(M);
-                let distribution = Uniform::new(0, k);
-                let random_number = distribution.sample(&mut rng);
+                let distribution: Uniform<usize> = Uniform::new(0, k);
+                let random_number: usize = distribution.sample(&mut rng);
                 act_sample = index2binary(random_number);
             }
             let mut next_obs = env.step(&act_sample);
@@ -62,10 +62,10 @@ pub mod play {
                 get_debug_graph(&obs_value);
                 std::process::abort();
             }
-            let is_terminated = next_obs.2;
-            let is_truncated = next_obs.3;
+            let is_terminated: bool = next_obs.2;
+            let is_truncated: bool = next_obs.3;
             episode_reward += reward;
-            let step = EpisodeStep {
+            let step: EpisodeStep = EpisodeStep {
                 observation: obs_value,
                 action: act_sample,
             };

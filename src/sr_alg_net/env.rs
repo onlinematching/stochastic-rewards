@@ -18,24 +18,14 @@ pub type IsAdj = bool;
 pub type ObservationSpace = ([Load; M], [RankTrans; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
+pub type Space = (ObservationSpace, ActionSpace);
 
 pub const ALPHA: f64 = 0.5;
 
 pub struct AdapticeAlgGame {
-    online_graph: StochasticReward<Key>,
-    adaptive_alg: super::awesome_alg::AwesomeAlg,
-    step: usize,
-}
-
-pub trait Env {
-    fn reset(
-        &mut self,
-        policy_net: Arc<dyn Module>,
-        seed: i64,
-    ) -> (ObservationSpace, Reward, bool, bool);
-
-    // step(action) -> next_obs, reward, is_terminated, is_truncated
-    fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool);
+    pub online_graph: StochasticReward<Key>,
+    pub adaptive_alg: super::awesome_alg::AwesomeAlg,
+    pub step: usize,
 }
 
 impl AdapticeAlgGame {
@@ -62,8 +52,8 @@ impl AdapticeAlgGame {
     }
 }
 
-impl Env for AdapticeAlgGame {
-    fn reset(
+impl AdapticeAlgGame {
+    pub fn reset(
         &mut self,
         policy_net: Arc<dyn Module>,
         _seed: i64,
@@ -77,7 +67,7 @@ impl Env for AdapticeAlgGame {
         (self.adaptive_alg.get_state(&adj), 0., false, false)
     }
 
-    fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool) {
+    pub fn step(&mut self) -> (Space, Reward, bool, bool) {
         let online_adj = self.get_online_adjacent();
         let alg_choose = self.adaptive_alg.dispatch(&online_adj);
         self.adaptive_alg.query_success(alg_choose);
