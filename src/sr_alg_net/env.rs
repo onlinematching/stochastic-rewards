@@ -1,12 +1,11 @@
 use super::{awesome_alg::AwesomeAlg, util::M};
-use onlinematching::{
-    papers::stochastic_reward::{
-        graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
-        mp12::Balance,
-        ranking::Ranking,
-    },
-    weightedbigraph::WBigraph,
-};
+use onlinematching::{papers::stochastic_reward::{
+    graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
+    mp12::Balance,
+    ranking::Ranking,
+}, weightedbigraph::WBigraph};
+use std::sync::Arc;
+use tch::nn::Module;
 
 pub type Reward = f64;
 pub type Step = usize;
@@ -29,7 +28,11 @@ pub struct AdapticeAlgGame {
 }
 
 pub trait Env {
-    fn reset(&mut self, seed: i64) -> (ObservationSpace, Reward, bool, bool);
+    fn reset(
+        &mut self,
+        policy_net: Arc<dyn Module>,
+        seed: i64,
+    ) -> (ObservationSpace, Reward, bool, bool);
 
     // step(action) -> next_obs, reward, is_terminated, is_truncated
     fn step(&mut self, action: &ActionSpace) -> (ObservationSpace, Reward, bool, bool);
@@ -37,10 +40,9 @@ pub trait Env {
 
 impl AdapticeAlgGame {
     pub fn new() -> AdapticeAlgGame {
-        let bg = WBigraph::new();
         Self {
-            online_graph: bg.into_stochastic_reward(),
-            adaptive_alg: AwesomeAlg::init(0),
+            online_graph: WBigraph::new().into_stochastic_reward(),
+            adaptive_alg: AwesomeAlg::init((0, None)),
             step: usize::MAX,
         }
     }
@@ -61,11 +63,15 @@ impl AdapticeAlgGame {
 }
 
 impl Env for AdapticeAlgGame {
-    fn reset(&mut self, _seed: i64) -> (ObservationSpace, Reward, bool, bool) {
+    fn reset(
+        &mut self,
+        policy_net: Arc<dyn Module>,
+        _seed: i64,
+    ) -> (ObservationSpace, Reward, bool, bool) {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
         self.step = Step::default();
-        self.adaptive_alg = AwesomeAlg::init(M);
+        self.adaptive_alg = AwesomeAlg::init((M, Some(policy_net)));
         let adj = self.get_online_adjacent();
 
         (self.adaptive_alg.get_state(&adj), 0., false, false)

@@ -5,20 +5,19 @@ use super::util;
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
-use onlinematching::papers::stochastic_reward::graph::{OfflineInfo, Prob};
+use onlinematching::papers::stochastic_reward::graph::Prob;
 use rand::seq::SliceRandom;
 use rand::{thread_rng, Rng};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use tch::nn::Module;
 use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
 pub const LABELS: usize = M;
+type AlgInfo = (usize, Option<Arc<dyn Module>>);
 
 pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
-pub static VS: Lazy<Mutex<nn::VarStore>> =
-    Lazy::new(|| nn::VarStore::new(*DEVICE.lock().unwrap()).into());
 
 pub fn policy_net(vs: &nn::Path) -> impl Module {
     const HIDDEN_LAYER: i64 = util::pow2(M + 3) as i64;
@@ -43,7 +42,7 @@ pub struct AwesomeAlg {
     pub offline_nodes_rank: Vec<Rank>,
     pub offline_nodes_loads: Vec<Prob>,
     // deep neural network
-    pub policy_net: Box<dyn Module>,
+    pub policy_net: Option<Arc<dyn Module>>,
 }
 
 impl AwesomeAlg {
@@ -79,8 +78,9 @@ impl AwesomeAlg {
     }
 }
 
-impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
-    fn init(l: OfflineInfo) -> Self {
+impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
+    fn init(info: AlgInfo) -> Self {
+        let (l, net) = info;
         assert_eq!(
             l, M,
             "This AdaptiveAlgorithm now only available for hyperparameter M length U"
@@ -94,24 +94,18 @@ impl AdaptiveAlgorithm<(usize, Prob), OfflineInfo> for AwesomeAlg {
             offline_nodes_rank.push(i as i32)
         }
         offline_nodes_rank.shuffle(&mut thread_rng());
-
-        // Network initial
-        let binding: std::sync::MutexGuard<nn::VarStore> = VS.lock().unwrap();
-        let vs_ref: nn::Path = binding.root();
-        let policy_net = policy_net(&vs_ref);
-
         AwesomeAlg {
             offline_nodes_available,
             offline_nodes_rank,
             offline_nodes_loads,
-            policy_net: Box::new(policy_net),
+            policy_net: net,
         }
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs = self.get_state(online_adjacent);
         let obs_tensor: Tensor = util::transmute_obs(obs);
-        let action_raw_tensor = self.policy_net.forward(&obs_tensor);
+        let action_raw_tensor = self.policy_net.clone().unwrap().forward(&obs_tensor);
         let action_prob = transmute_act(&action_raw_tensor).0;
         let action = sample_from_softmax(&action_prob);
         let probs = obs.2;
