@@ -14,11 +14,11 @@ pub type Reward = f64;
 pub type Step = usize;
 pub type Key = usize;
 pub type Load = Prob;
-pub type Rank = i32;
-pub type RankTrans = f64;
+pub type Seq = i32;
+pub type SeqTrans = f64;
 pub type IsAdj = bool;
 
-pub type ObservationSpace = ([Load; M], [RankTrans; M], [Prob; M], [IsAdj; M]);
+pub type ObservationSpace = ([Load; M], [SeqTrans; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
 pub type Space = (ObservationSpace, Option<ActionSpace>);

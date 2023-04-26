@@ -1,6 +1,6 @@
 use crate::sr_alg_net::util::{sample_from_softmax, transmute_act};
 
-use super::env::{IsAdj, Load, ObservationSpace, Rank, RankTrans};
+use super::env::{IsAdj, Load, ObservationSpace, Seq, SeqTrans};
 use super::util;
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
@@ -40,7 +40,7 @@ pub fn policy_net(vs: &nn::Path) -> impl Module {
 #[derive(Debug)]
 pub struct AwesomeAlg {
     pub offline_nodes_available: Vec<IsAdj>,
-    pub offline_nodes_rank: Vec<Rank>,
+    pub offline_nodes_seq: Vec<Seq>,
     pub offline_nodes_loads: Vec<Prob>,
     // deep neural network
     pub policy_net: Option<Arc<dyn Module>>,
@@ -49,7 +49,7 @@ pub struct AwesomeAlg {
 impl AwesomeAlg {
     pub fn get_state(&self, online_adjacent: &Vec<(usize, Prob)>) -> ObservationSpace {
         let mut load = [Load::default(); M];
-        let mut rank = [RankTrans::default(); M];
+        let mut seq = [SeqTrans::default(); M];
         let mut prob = [Prob::default(); M];
         let mut adj_avail = [true; M];
 
@@ -59,7 +59,7 @@ impl AwesomeAlg {
                 online_adjacent,
             );
         let rank_vec = self
-            .offline_nodes_rank
+            .offline_nodes_seq
             .iter()
             .map(|&a| a as f64 / M as f64)
             .collect::<Vec<f64>>();
@@ -71,11 +71,11 @@ impl AwesomeAlg {
         }
         for i in 0..M {
             load[i] = self.offline_nodes_loads[i];
-            rank[i] = rank_vec[i];
+            seq[i] = rank_vec[i];
             prob[i] = prob_vec[i];
             adj_avail[i] = adj_avail_vec[i]
         }
-        (load, rank, prob, adj_avail)
+        (load, seq, prob, adj_avail)
     }
 }
 
@@ -97,7 +97,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         offline_nodes_rank.shuffle(&mut thread_rng());
         AwesomeAlg {
             offline_nodes_available,
-            offline_nodes_rank,
+            offline_nodes_seq: offline_nodes_rank,
             offline_nodes_loads,
             policy_net: net,
         }
