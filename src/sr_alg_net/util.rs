@@ -2,12 +2,18 @@ use super::env::{ActionProbSpace, ObservationSpace};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
+use rand::Rng;
 use tch::Tensor;
 
 pub const M: usize = 3;
 
 pub const fn pow2(n: usize) -> usize {
     1 << n
+}
+
+pub fn bernoulli_trial(p: f64) -> bool {
+    let mut rng = rand::thread_rng();
+    rng.gen::<f64>() < p
 }
 
 pub fn transmute_obs(obs: ObservationSpace) -> Tensor {

@@ -1,4 +1,8 @@
-use super::{awesome_alg::AwesomeAlg, util::M};
+use super::{
+    awesome_alg::AwesomeAlg,
+    util::{bernoulli_trial, M},
+};
+use ndarray_rand::rand_distr::Uniform;
 use onlinematching::{
     papers::stochastic_reward::{
         graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
@@ -7,6 +11,7 @@ use onlinematching::{
     },
     weightedbigraph::WBigraph,
 };
+use rand::Rng;
 use std::sync::Arc;
 use tch::nn::Module;
 
@@ -42,7 +47,12 @@ impl AdapticeAlgGame {
     }
 
     pub fn generate_random_sr() -> StochasticReward<Key> {
-        onlinematching::papers::stochastic_reward::mp12::example::gk(3, 20)
+        let range = Uniform::new_inclusive(1, 10);
+        let mut rng = rand::thread_rng();
+        let m = rng.sample(range);
+        let gk = onlinematching::papers::stochastic_reward::mp12::example::gk(M, m);
+        println!("gk = {:?}", gk);
+        gk
     }
 
     fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
