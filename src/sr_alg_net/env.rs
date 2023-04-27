@@ -1,7 +1,4 @@
-use super::{
-    awesome_alg::AwesomeAlg,
-    util::{bernoulli_trial, M},
-};
+use super::{awesome_alg::AwesomeAlg, util::M};
 use ndarray_rand::rand_distr::Uniform;
 use onlinematching::{
     papers::stochastic_reward::{

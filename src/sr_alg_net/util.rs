@@ -11,6 +11,7 @@ pub const fn pow2(n: usize) -> usize {
     1 << n
 }
 
+#[allow(dead_code)]
 pub fn bernoulli_trial(p: f64) -> bool {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>() < p
