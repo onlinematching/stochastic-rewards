@@ -14,11 +14,9 @@ pub type Reward = f64;
 pub type Step = usize;
 pub type Key = usize;
 pub type Load = Prob;
-pub type Seq = i32;
-pub type SeqTrans = f64;
 pub type IsAdj = bool;
 
-pub type ObservationSpace = ([Load; M], [SeqTrans; M], [Prob; M], [IsAdj; M]);
+pub type ObservationSpace = ([Load; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
 pub type Space = (ObservationSpace, Option<ActionSpace>);
@@ -60,7 +58,7 @@ impl AdapticeAlgGame {
 
     fn get_alg(&self) -> f64 {
         let mut alg_sum: f64 = 0.;
-        let net: Option<Arc<dyn Module>> = self.adaptive_alg.policy_net.clone();
+        let net: Option<Arc<dyn Module>> = self.adaptive_alg.deep_q_net.clone();
         for _ in 0..PRECISION {
             let mut alg = AwesomeAlg::init((M, net.clone()));
             for online_adj in self.online_graph.iter() {

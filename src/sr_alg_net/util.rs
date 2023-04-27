@@ -1,4 +1,4 @@
-use super::env::{ActionProbSpace, ObservationSpace};
+use super::env::{ActionProbSpace, ObservationSpace, ActionSpace, Space};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
@@ -10,19 +10,18 @@ pub const fn pow2(n: usize) -> usize {
     1 << n
 }
 
-pub fn transmute_obs(obs: ObservationSpace) -> Tensor {
-    let mut obs_transmute: Vec<f32> = Vec::new();
-    obs_transmute.extend(obs.0.iter().map(|&a| a as f32));
-    obs_transmute.extend(obs.1.iter().map(|&a| a as f32));
-    obs_transmute.extend(obs.2.iter().map(|&a| a as f32));
-    obs_transmute.extend(obs.3.map(|a| match a {
+pub fn obser2tensor(obs: ObservationSpace) -> Tensor {
+    let mut obs_trans: Vec<f32> = Vec::new();
+    obs_trans.extend(obs.0.iter().map(|&a| a as f32));
+    obs_trans.extend(obs.1.iter().map(|&a| a as f32));
+    obs_trans.extend(obs.2.map(|a| match a {
         true => 1.,
         false => 0.,
     }));
-    Tensor::of_slice(&obs_transmute)
+    Tensor::of_slice(&obs_trans)
 }
 
-pub fn transmute_act(action: &Tensor) -> ActionProbSpace {
+pub fn tensor2actprob(action: &Tensor) -> ActionProbSpace {
     let action_raw = Vec::<f32>::from(action.view(-1));
     let mut action = [0.; M];
     for i in 0..M {
@@ -31,7 +30,19 @@ pub fn transmute_act(action: &Tensor) -> ActionProbSpace {
     (action,)
 }
 
-pub fn sample_from_softmax(r: &[Prob; M]) -> usize {
+pub fn deep_q_net_pretransmute(x: Space) -> Tensor {
+    let mut t: Vec<f32> = Vec::new();
+    t.extend(x.0.0.iter().map(|&a| a as f32));
+    t.extend(x.0.1.iter().map(|&a| a as f32));
+    t.extend(x.0.2.map(|a| match a {
+        true => 1.,
+        false => 0.,
+    }));
+    t.push(x.1.unwrap() as f32);
+    Tensor::of_slice(&t)
+}
+
+pub fn sample_from_softmax<const N: usize>(r: &[Prob; N]) -> usize {
     let arr = Array::from_iter(r.into_iter());
     let mut rng = rand::thread_rng();
     let mut probabilities = arr.mapv(|x| x.exp());

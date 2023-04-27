@@ -1,6 +1,6 @@
-use crate::sr_alg_net::util::{sample_from_softmax, transmute_act};
+use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
 
-use super::env::{IsAdj, Load, ObservationSpace, Seq, SeqTrans};
+use super::env::{IsAdj, Load, ObservationSpace};
 use super::util;
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
@@ -14,25 +14,33 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-pub const LABELS: usize = M;
 type AlgInfo = (usize, Option<Arc<dyn Module>>);
 
 pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
-pub fn policy_net(vs: &nn::Path) -> impl Module {
-    const HIDDEN_LAYER: i64 = util::pow2(M + 3) as i64;
+pub fn deep_q_net(vs: &nn::Path) -> impl Module {
+    const HIDDEN_LAYER1: i64 = util::pow2(M + 3) as i64;
+    const HIDDEN_LAYER2: i64 = util::pow2(M + 2) as i64;
     nn::seq()
         .add(nn::linear(
             vs / "layer1",
-            (M + M + M + M) as i64,
-            HIDDEN_LAYER,
+            // Observation Spave dim + Action Space dim
+            (3 * M + M) as i64,
+            HIDDEN_LAYER1,
             Default::default(),
         ))
         .add_fn(|xs| xs.relu())
         .add(nn::linear(
-            vs,
-            HIDDEN_LAYER,
-            LABELS as i64,
+            vs / "layer2",
+            HIDDEN_LAYER1,
+            HIDDEN_LAYER2 as i64,
+            Default::default(),
+        ))
+        .add_fn(|xs| xs.relu())
+        .add(nn::linear(
+            vs / "layer2",
+            HIDDEN_LAYER2,
+            1 as i64,
             Default::default(),
         ))
 }
@@ -40,16 +48,14 @@ pub fn policy_net(vs: &nn::Path) -> impl Module {
 #[derive(Debug)]
 pub struct AwesomeAlg {
     pub offline_nodes_available: Vec<IsAdj>,
-    pub offline_nodes_seq: Vec<Seq>,
     pub offline_nodes_loads: Vec<Prob>,
-    // deep neural network
-    pub policy_net: Option<Arc<dyn Module>>,
+    // deep Q network
+    pub deep_q_net: Option<Arc<dyn Module>>,
 }
 
 impl AwesomeAlg {
     pub fn get_state(&self, online_adjacent: &Vec<(usize, Prob)>) -> ObservationSpace {
         let mut load = [Load::default(); M];
-        let mut seq = [SeqTrans::default(); M];
         let mut prob = [Prob::default(); M];
         let mut adj_avail = [true; M];
 
@@ -58,11 +64,6 @@ impl AwesomeAlg {
                 &self.offline_nodes_available,
                 online_adjacent,
             );
-        let rank_vec = self
-            .offline_nodes_seq
-            .iter()
-            .map(|&a| a as f64 / M as f64)
-            .collect::<Vec<f64>>();
         let mut adj_avail_vec = vec![false; M];
         let mut prob_vec: Vec<f64> = vec![0.; M];
         for (i, p) in available_offline_nodes {
@@ -71,11 +72,10 @@ impl AwesomeAlg {
         }
         for i in 0..M {
             load[i] = self.offline_nodes_loads[i];
-            seq[i] = rank_vec[i];
             prob[i] = prob_vec[i];
             adj_avail[i] = adj_avail_vec[i]
         }
-        (load, seq, prob, adj_avail)
+        (load, prob, adj_avail)
     }
 }
 
@@ -90,28 +90,22 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         offline_nodes_available.resize(l, true);
         let mut offline_nodes_loads: Vec<Prob> = Vec::with_capacity(l);
         offline_nodes_loads.resize(l, 0.);
-        let mut offline_nodes_rank = Vec::with_capacity(l);
-        for i in 0..l {
-            offline_nodes_rank.push(i as i32)
-        }
-        offline_nodes_rank.shuffle(&mut thread_rng());
         AwesomeAlg {
             offline_nodes_available,
-            offline_nodes_seq: offline_nodes_rank,
             offline_nodes_loads,
-            policy_net: net,
+            deep_q_net: net,
         }
     }
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs: ObservationSpace = self.get_state(online_adjacent);
-        let obs_tensor: Tensor = util::transmute_obs(obs);
-        let action_raw_tensor = self.policy_net.clone().unwrap().forward(&obs_tensor);
-        let action_prob = transmute_act(&action_raw_tensor).0;
+        let obs_tensor: Tensor = util::obser2tensor(obs);
+        let action_raw_tensor = self.deep_q_net.clone().unwrap().forward(&obs_tensor);
+        let action_prob = tensor2actprob(&action_raw_tensor).0;
         let action = sample_from_softmax(&action_prob);
-        let probs = obs.2;
-        let prob: f64 = probs[action];
-        let is_adj = obs.3;
+        let probs = obs.1;
+        let prob = probs[action];
+        let is_adj = obs.2;
         if is_adj[action] {
             Some((action, prob))
         } else {
