@@ -3,7 +3,6 @@ use std::time::Duration;
 
 use crate::sr_alg_net::awesome_alg::{deep_q_net, DEVICE};
 use crate::sr_alg_net::env::AdapticeAlgGame;
-use crate::sr_alg_net::play::{filter_batch, iterate_batches};
 use crate::sr_alg_net::util::obser2tensor;
 use anyhow::{Ok, Result};
 use std::thread;
