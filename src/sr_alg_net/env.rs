@@ -73,11 +73,11 @@ impl AdapticeAlgGame {
 }
 
 impl AdapticeAlgGame {
-    pub fn reset(&mut self, policy_net: Arc<dyn Module>, _seed: i64) -> ObservationSpace {
+    pub fn reset(&mut self, deep_q_net: Arc<dyn Module>, _seed: i64) -> ObservationSpace {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
         self.step = Step::default();
-        self.adaptive_alg = AwesomeAlg::init((M, Some(policy_net)));
+        self.adaptive_alg = AwesomeAlg::init((M, Some(deep_q_net)));
         let adj = self.get_online_adjacent();
         self.adaptive_alg.get_state(&adj)
     }

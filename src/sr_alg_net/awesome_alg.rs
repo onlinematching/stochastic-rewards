@@ -1,13 +1,12 @@
 use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
 
-use super::env::{IsAdj, Load, ObservationSpace};
-use super::util;
+use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
+use super::util::{self, deep_q_net_pretransmute};
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
 use onlinematching::papers::stochastic_reward::graph::Prob;
-use rand::seq::SliceRandom;
-use rand::{thread_rng, Rng};
+use rand::Rng;
 use std::sync::{Arc, Mutex};
 use tch::nn::Module;
 use tch::Device;
@@ -25,7 +24,7 @@ pub fn deep_q_net(vs: &nn::Path) -> impl Module {
         .add(nn::linear(
             vs / "layer1",
             // Observation Spave dim + Action Space dim
-            (3 * M + M) as i64,
+            (3 * M + 1) as i64,
             HIDDEN_LAYER1,
             Default::default(),
         ))
@@ -99,10 +98,27 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
 
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs: ObservationSpace = self.get_state(online_adjacent);
-        let obs_tensor: Tensor = util::obser2tensor(obs);
-        let action_raw_tensor = self.deep_q_net.clone().unwrap().forward(&obs_tensor);
-        let action_prob = tensor2actprob(&action_raw_tensor).0;
-        let action = sample_from_softmax(&action_prob);
+        let actions = (0..M).collect::<Vec<ActionSpace>>();
+        let spaces = actions
+            .clone()
+            .into_iter()
+            .map(|act: ActionSpace| (obs.clone(), Some(act)))
+            .map(|space: Space| deep_q_net_pretransmute(space))
+            .collect::<Vec<Tensor>>();
+        let rewards: Vec<Reward> = spaces
+            .iter()
+            .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
+            .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
+            .collect::<Vec<Reward>>();
+
+        let mut action = ActionSpace::MAX;
+        let mut reward = Reward::MIN;
+        for i in actions.into_iter() {
+            if rewards[i] > reward {
+                reward = rewards[i];
+                action = i;
+            }
+        }
         let probs = obs.1;
         let prob = probs[action];
         let is_adj = obs.2;

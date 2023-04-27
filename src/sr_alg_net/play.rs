@@ -23,13 +23,13 @@ pub struct Episode {
 
 pub fn iterate_batches(
     game: &mut AdapticeAlgGame,
-    net: Arc<dyn Module>,
+    deep_q_net: Arc<dyn Module>,
     batch_size: usize,
 ) -> Vec<Episode> {
     let mut batch: Vec<Episode> = vec![];
     let mut episode_reward: f64 = 0.;
     let mut episode_steps: Vec<EpisodeStep> = vec![];
-    let mut obs_old: ObservationSpace = game.reset(net.clone(), SEED);
+    let mut obs_old: ObservationSpace = game.reset(deep_q_net.clone(), SEED);
     loop {
         let info: (Space, f64, bool, bool) = game.step();
         let space: Space = info.0;
@@ -52,7 +52,7 @@ pub fn iterate_batches(
             };
             episode_reward = 0.;
             episode_steps.clear();
-            obs_new = game.reset(net.clone(), 42);
+            obs_new = game.reset(deep_q_net.clone(), 42);
             if batch.len() == batch_size {
                 return batch;
             }
