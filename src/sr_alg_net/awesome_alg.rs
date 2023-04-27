@@ -13,6 +13,7 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
+const GAMMA: f64 = 1. - 1. / M as f64;
 type AlgInfo = (usize, Option<Arc<dyn Module>>);
 
 pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
@@ -99,6 +100,8 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs: ObservationSpace = self.get_state(online_adjacent);
         let actions = (0..M).collect::<Vec<ActionSpace>>();
+        let mut action: usize;
+        let mut reward: f64;
         let spaces = actions
             .clone()
             .into_iter()
@@ -111,8 +114,8 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
             .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
             .collect::<Vec<Reward>>();
 
-        let mut action = ActionSpace::MAX;
-        let mut reward = Reward::MIN;
+        action = ActionSpace::MAX;
+        reward = Reward::MIN;
         for i in actions.into_iter() {
             if rewards[i] > reward {
                 reward = rewards[i];

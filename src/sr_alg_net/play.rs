@@ -8,6 +8,7 @@ use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
 type Reward = f64;
 
 const SEED: i64 = 42;
+const LEARNING_RATE: f64 = 0.98;
 
 #[derive(Clone, Debug)]
 pub struct EpisodeStep {
@@ -21,3 +22,10 @@ pub struct Episode {
     steps: Vec<EpisodeStep>,
 }
 
+pub fn play_step(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) {
+
+}
+
+pub fn calculate_loss() {
+    
+}
