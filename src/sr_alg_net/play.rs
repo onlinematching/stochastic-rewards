@@ -23,9 +23,9 @@ pub struct Episode {
 }
 
 pub fn play_step(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) {
+    let mut total_reward: Reward = Reward::default();
+    let mut state: ObservationSpace = game.reset(deep_q_net.clone(), SEED);
 
 }
 
-pub fn calculate_loss() {
-    
-}
+pub fn calculate_loss() {}

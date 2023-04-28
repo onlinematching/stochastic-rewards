@@ -14,7 +14,14 @@ use tch::{nn, Tensor};
 
 const M: usize = util::M;
 const GAMMA: f64 = 1. - 1. / M as f64;
-type AlgInfo = (usize, Option<Arc<dyn Module>>);
+
+#[derive(Debug, Clone, Copy)]
+pub enum State {
+    Train,
+    Infer,
+}
+
+type AlgInfo = (usize, Option<Arc<dyn Module>>, State);
 
 pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
@@ -51,6 +58,8 @@ pub struct AwesomeAlg {
     pub offline_nodes_loads: Vec<Prob>,
     // deep Q network
     pub deep_q_net: Option<Arc<dyn Module>>,
+    // distinguish train or inferance
+    pub state: State,
 }
 
 impl AwesomeAlg {
@@ -81,7 +90,7 @@ impl AwesomeAlg {
 
 impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
     fn init(info: AlgInfo) -> Self {
-        let (l, net) = info;
+        let (l, net, state) = info;
         assert_eq!(
             l, M,
             "This AdaptiveAlgorithm now only available for hyperparameter M length U"
@@ -94,6 +103,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
             offline_nodes_available,
             offline_nodes_loads,
             deep_q_net: net,
+            state
         }
     }
 

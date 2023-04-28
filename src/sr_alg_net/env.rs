@@ -1,4 +1,7 @@
-use super::{awesome_alg::AwesomeAlg, util::M};
+use super::{
+    awesome_alg::{AwesomeAlg, State},
+    util::M,
+};
 use onlinematching::{
     papers::stochastic_reward::{
         graph::{algorithm::AdaptiveAlgorithm, Prob, StochasticReward},
@@ -34,7 +37,7 @@ impl AdapticeAlgGame {
     pub fn new() -> AdapticeAlgGame {
         Self {
             online_graph: WBigraph::new().into_stochastic_reward(),
-            adaptive_alg: AwesomeAlg::init((M, None)),
+            adaptive_alg: AwesomeAlg::init((M, None, State::Train)),
             step: usize::MAX,
         }
     }
@@ -60,7 +63,7 @@ impl AdapticeAlgGame {
         let mut alg_sum: f64 = 0.;
         let net: Option<Arc<dyn Module>> = self.adaptive_alg.deep_q_net.clone();
         for _ in 0..PRECISION {
-            let mut alg = AwesomeAlg::init((M, net.clone()));
+            let mut alg = AwesomeAlg::init((M, net.clone(), State::Train));
             for online_adj in self.online_graph.iter() {
                 let alg_choose = alg.dispatch(online_adj);
                 alg.query_success(alg_choose);
@@ -77,7 +80,7 @@ impl AdapticeAlgGame {
         let graph = Self::generate_random_sr();
         self.online_graph = graph;
         self.step = Step::default();
-        self.adaptive_alg = AwesomeAlg::init((M, Some(deep_q_net)));
+        self.adaptive_alg = AwesomeAlg::init((M, Some(deep_q_net), State::Train));
         let adj = self.get_online_adjacent();
         self.adaptive_alg.get_state(&adj)
     }

@@ -1,7 +1,8 @@
-use super::env::{ActionProbSpace, ObservationSpace, ActionSpace, Space};
+use super::env::{ActionProbSpace, ActionSpace, ObservationSpace, Space};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
+use rand::{thread_rng, Rng};
 use tch::Tensor;
 
 pub const M: usize = 3;
@@ -32,14 +33,20 @@ pub fn tensor2actprob(action: &Tensor) -> ActionProbSpace {
 
 pub fn deep_q_net_pretransmute(x: Space) -> Tensor {
     let mut t: Vec<f32> = Vec::new();
-    t.extend(x.0.0.iter().map(|&a| a as f32));
-    t.extend(x.0.1.iter().map(|&a| a as f32));
-    t.extend(x.0.2.map(|a| match a {
+    t.extend(x.0 .0.iter().map(|&a| a as f32));
+    t.extend(x.0 .1.iter().map(|&a| a as f32));
+    t.extend(x.0 .2.map(|a| match a {
         true => 1.,
         false => 0.,
     }));
     t.push(x.1.unwrap() as f32);
     Tensor::of_slice(&t)
+}
+
+pub fn sample<T>(my_vec: &Vec<T>) -> &T {
+    let mut rng = thread_rng();
+    let index = rng.gen_range(0..my_vec.len());
+    &my_vec[index]
 }
 
 pub fn sample_from_softmax<const N: usize>(r: &[Prob; N]) -> usize {
