@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use crate::sr_alg_net::awesome_alg::{deep_q_net, DEVICE};
 use crate::sr_alg_net::env::AdapticeAlgGame;
+use crate::sr_alg_net::play::play_step;
 use crate::sr_alg_net::util::obser2tensor;
 use anyhow::{Ok, Result};
 use std::thread;
@@ -19,7 +20,7 @@ pub fn run() -> Result<()> {
     let deep_q_net = Arc::new(deep_q_net(&vs_ref_binding));
     let mut opt: nn::Optimizer = nn::Adam::default().build(&vs, 1e-3)?;
     for epoch in 1..10000 {
-        
+        play_step(&mut game, deep_q_net.clone());
     }
     Ok(())
 }

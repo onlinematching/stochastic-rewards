@@ -103,7 +103,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
             offline_nodes_available,
             offline_nodes_loads,
             deep_q_net: net,
-            state
+            state,
         }
     }
 
@@ -112,33 +112,38 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         let actions = (0..M).collect::<Vec<ActionSpace>>();
         let mut action: usize;
         let mut reward: f64;
-        let spaces = actions
-            .clone()
-            .into_iter()
-            .map(|act: ActionSpace| (obs.clone(), Some(act)))
-            .map(|space: Space| deep_q_net_pretransmute(space))
-            .collect::<Vec<Tensor>>();
-        let rewards: Vec<Reward> = spaces
-            .iter()
-            .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
-            .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
-            .collect::<Vec<Reward>>();
+        match self.state {
+            State::Train => {
+                let spaces = actions
+                    .clone()
+                    .into_iter()
+                    .map(|act: ActionSpace| (obs.clone(), Some(act)))
+                    .map(|space: Space| deep_q_net_pretransmute(space))
+                    .collect::<Vec<Tensor>>();
+                let rewards: Vec<Reward> = spaces
+                    .iter()
+                    .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
+                    .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
+                    .collect::<Vec<Reward>>();
 
-        action = ActionSpace::MAX;
-        reward = Reward::MIN;
-        for i in actions.into_iter() {
-            if rewards[i] > reward {
-                reward = rewards[i];
-                action = i;
+                action = ActionSpace::MAX;
+                reward = Reward::MIN;
+                for i in actions.into_iter() {
+                    if rewards[i] > reward {
+                        reward = rewards[i];
+                        action = i;
+                    }
+                }
+                let probs = obs.1;
+                let prob = probs[action];
+                let is_adj = obs.2;
+                if is_adj[action] {
+                    Some((action, prob))
+                } else {
+                    None
+                }
             }
-        }
-        let probs = obs.1;
-        let prob = probs[action];
-        let is_adj = obs.2;
-        if is_adj[action] {
-            Some((action, prob))
-        } else {
-            None
+            State::Infer => todo!(),
         }
     }
 
