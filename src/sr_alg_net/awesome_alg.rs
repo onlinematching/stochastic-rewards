@@ -1,7 +1,7 @@
 use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
 
 use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
-use super::util::{self, deep_q_net_pretransmute};
+use super::util::{self, bernoulli_trial, deep_q_net_pretransmute, sample};
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
@@ -14,8 +14,9 @@ use tch::{nn, Tensor};
 
 const M: usize = util::M;
 const GAMMA: f64 = 1. - 1. / M as f64;
+const ALPHA: f64 = 0.9;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum State {
     Train,
     Infer,
@@ -111,39 +112,37 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         let obs: ObservationSpace = self.get_state(online_adjacent);
         let actions = (0..M).collect::<Vec<ActionSpace>>();
         let mut action: usize;
-        let mut reward: f64;
-        match self.state {
-            State::Train => {
-                let spaces = actions
-                    .clone()
-                    .into_iter()
-                    .map(|act: ActionSpace| (obs.clone(), Some(act)))
-                    .map(|space: Space| deep_q_net_pretransmute(space))
-                    .collect::<Vec<Tensor>>();
-                let rewards: Vec<Reward> = spaces
-                    .iter()
-                    .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
-                    .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
-                    .collect::<Vec<Reward>>();
-
-                action = ActionSpace::MAX;
-                reward = Reward::MIN;
-                for i in actions.into_iter() {
-                    if rewards[i] > reward {
-                        reward = rewards[i];
-                        action = i;
-                    }
-                }
-                let probs = obs.1;
-                let prob = probs[action];
-                let is_adj = obs.2;
-                if is_adj[action] {
-                    Some((action, prob))
-                } else {
-                    None
+        if self.state == State::Train && !bernoulli_trial(ALPHA) {
+            action = *sample(&actions);
+        } else {
+            let mut reward: f64;
+            let spaces = actions
+                .clone()
+                .into_iter()
+                .map(|act: ActionSpace| (obs.clone(), Some(act)))
+                .map(|space: Space| deep_q_net_pretransmute(space))
+                .collect::<Vec<Tensor>>();
+            let rewards: Vec<Reward> = spaces
+                .iter()
+                .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
+                .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
+                .collect::<Vec<Reward>>();
+            action = ActionSpace::MAX;
+            reward = Reward::MIN;
+            for i in actions.clone().into_iter() {
+                if rewards[i] > reward {
+                    reward = rewards[i];
+                    action = i;
                 }
             }
-            State::Infer => todo!(),
+        }
+        let probs = obs.1;
+        let prob = probs[action];
+        let is_adj = obs.2;
+        if is_adj[action] {
+            Some((action, prob))
+        } else {
+            None
         }
     }
 

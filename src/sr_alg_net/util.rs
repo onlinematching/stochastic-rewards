@@ -11,6 +11,11 @@ pub const fn pow2(n: usize) -> usize {
     1 << n
 }
 
+pub fn bernoulli_trial(p: f64) -> bool {
+    let mut rng = rand::thread_rng();
+    rng.gen::<f64>() < p
+}
+
 pub fn obser2tensor(obs: ObservationSpace) -> Tensor {
     let mut obs_trans: Vec<f32> = Vec::new();
     obs_trans.extend(obs.0.iter().map(|&a| a as f32));
