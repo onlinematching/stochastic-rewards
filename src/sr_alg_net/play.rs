@@ -25,6 +25,10 @@ pub struct ExperienceBuffer {
 }
 
 impl ExperienceBuffer {
+    fn new() -> Self {
+        ExperienceBuffer { buffer: Vec::new() }
+    }
+
     #[inline]
     fn len(&self) -> usize {
         self.buffer.len()
@@ -35,12 +39,30 @@ impl ExperienceBuffer {
     }
 }
 
-pub fn play_step(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) {
+pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<ExperienceBuffer> {
+    let mut buffer = ExperienceBuffer::new();
     let mut state: ObservationSpace = game.reset(deep_q_net.clone(), SEED);
-    let info: (Space, f64, bool, bool) = game.step();
-    let space: Space = info.0;
-    let (mut obs_new, action) = space;
-    
+    loop {
+        let info: (Space, f64, bool, bool) = game.step();
+        let (space, reward, is_terminated, is_truncated) = info;
+        if is_truncated {
+            return None;
+        }
+        let (new_state, action) = space;
+        let exp = Experience {
+            state,
+            action,
+            reward,
+            done: is_terminated,
+            new_state,
+        };
+        buffer.push(exp);
+
+        if is_terminated {
+            return Some(buffer);
+        }
+        state = new_state;
+    }
 }
 
 pub fn calculate_loss() {}
