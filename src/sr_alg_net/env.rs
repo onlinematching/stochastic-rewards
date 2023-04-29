@@ -63,7 +63,7 @@ impl AdapticeAlgGame {
         let mut alg_sum: f64 = 0.;
         let net: Option<Arc<dyn Module>> = self.adaptive_alg.deep_q_net.clone();
         for _ in 0..PRECISION {
-            let mut alg = AwesomeAlg::init((M, net.clone(), State::Train));
+            let mut alg = AwesomeAlg::init((M, net.clone(), State::Infer));
             for online_adj in self.online_graph.iter() {
                 let alg_choose = alg.dispatch(online_adj);
                 alg.query_success(alg_choose);
@@ -89,20 +89,18 @@ impl AdapticeAlgGame {
         let online_adj = self.get_online_adjacent();
         let alg_choose = self.adaptive_alg.dispatch(&online_adj);
         let obs: ObservationSpace = self.adaptive_alg.get_state(&online_adj);
-        self.adaptive_alg.query_success(alg_choose);
+        let success = self.adaptive_alg.query_success(alg_choose);
         self.step += 1;
         match alg_choose {
-            Some((action, _prob)) => {
+            Some((action, _p)) => {
+                let reward: f64 = match success.unwrap() {
+                    true => 1.,
+                    false => 0.,
+                };
                 if self.step == M {
-                    let ratio_contrast = self.normal_alg_geometric_mean(PRECISION) / M as f64;
-                    let true_ratio = self.get_alg() / M as f64;
-                    let reward = true_ratio / ratio_contrast;
-                    if DEBUG {
-                        println!("ratio_contrast = {ratio_contrast}, true_ratio = {true_ratio}, reward = {reward}");
-                    }
                     ((obs, Some(action)), reward, true, false)
                 } else {
-                    ((obs, Some(action)), 0., false, false)
+                    ((obs, Some(action)), reward, false, false)
                 }
             }
             None => ((obs, None), 0., false, true),
