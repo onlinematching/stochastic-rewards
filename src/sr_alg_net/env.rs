@@ -91,24 +91,18 @@ impl AdapticeAlgGame {
         let obs: ObservationSpace = self.adaptive_alg.get_state(&online_adj);
         let success = self.adaptive_alg.query_success(alg_choose);
         self.step += 1;
+        let last_step = self.online_graph.weighted_bigraph.v_nodes.len();
+        let is_terminated = self.step == last_step;
         match alg_choose {
             Some((action, _p)) => {
                 let reward: f64 = match success.unwrap() {
                     true => 1.,
                     false => 0.,
                 };
-                if self.step == M {
-                    ((obs, Some(action)), reward, true)
-                } else {
-                    ((obs, Some(action)), reward, false)
-                }
+                ((obs, Some(action)), reward, is_terminated)
             }
             None => {
-                if self.step == M {
-                    ((obs, None), 0., true)
-                } else {
-                    ((obs, None), 0., false)
-                }
+                ((obs, None), 0., is_terminated)
             },
         }
     }

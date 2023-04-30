@@ -63,11 +63,11 @@ pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<E
 }
 
 pub fn calculate_loss(
-    state_action_v: Tensor,
-    reward_v: Tensor,
-    next_states_v: Tensor,
+    state_action: Vec<Space>,
+    reward: Vec<Reward>,
+    next_states: Vec<ObservationSpace>,
     done_mask: Vec<bool>,
     net: Arc<dyn Module>,
-) {
-    
+) -> Tensor {
+    todo!()
 }
