@@ -44,6 +44,7 @@ pub fn pre_deep_q_net_pretransmute(x: Space) -> Vec<f32> {
         true => 1.,
         false => 0.,
     }));
+    t.push(x.0.unwrap().3 as f32);
     match x.1 {
         Some(act) => t.push(act as f32),
         None => t.push(M as f32),

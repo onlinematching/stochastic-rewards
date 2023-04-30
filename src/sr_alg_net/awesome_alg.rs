@@ -1,4 +1,4 @@
-use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
+use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space, Step};
 use super::util::{self, bernoulli_trial, deep_q_net_pretransmute, sample};
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
@@ -11,7 +11,7 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-const ALPHA: f64 = 0.8;
+const ALPHA: f64 = 0.93;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum State {
@@ -24,27 +24,19 @@ type AlgInfo = (usize, Option<Arc<dyn Module>>, State);
 pub static DEVICE: Lazy<Mutex<Device>> = Lazy::new(|| Device::cuda_if_available().into());
 
 pub fn deep_q_net(vs: &nn::Path) -> impl Module {
-    const HIDDEN_LAYER1: i64 = util::pow2(M + 3) as i64;
-    const HIDDEN_LAYER2: i64 = util::pow2(M + 2) as i64;
+    const HIDDEN_LAYER: i64 = util::pow2(M + 3) as i64;
     nn::seq()
         .add(nn::linear(
             vs / "layer1",
             // Observation Spave dim + Action Space dim
-            (3 * M + 1) as i64,
-            HIDDEN_LAYER1,
+            (3 * M + 1 + 1) as i64,
+            HIDDEN_LAYER,
             Default::default(),
         ))
         .add_fn(|xs| xs.relu())
         .add(nn::linear(
             vs / "layer2",
-            HIDDEN_LAYER1,
-            HIDDEN_LAYER2 as i64,
-            Default::default(),
-        ))
-        .add_fn(|xs| xs.relu())
-        .add(nn::linear(
-            vs / "layer2",
-            HIDDEN_LAYER2,
+            HIDDEN_LAYER,
             1 as i64,
             Default::default(),
         ))
@@ -54,6 +46,7 @@ pub fn deep_q_net(vs: &nn::Path) -> impl Module {
 pub struct AwesomeAlg {
     pub offline_nodes_available: Vec<IsAdj>,
     pub offline_nodes_loads: Vec<Prob>,
+    pub step: Step,
     // deep Q network
     pub deep_q_net: Option<Arc<dyn Module>>,
     // distinguish train or inferance
@@ -82,7 +75,7 @@ impl AwesomeAlg {
             prob[i] = prob_vec[i];
             adj_avail[i] = adj_avail_vec[i]
         }
-        (load, prob, adj_avail)
+        (load, prob, adj_avail, self.step)
     }
 }
 
@@ -125,9 +118,11 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         offline_nodes_available.resize(l, true);
         let mut offline_nodes_loads: Vec<Prob> = Vec::with_capacity(l);
         offline_nodes_loads.resize(l, 0.);
+        let step = 0;
         AwesomeAlg {
             offline_nodes_available,
             offline_nodes_loads,
+            step,
             deep_q_net: net,
             state,
         }
@@ -142,6 +137,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         } else {
             action = get_best_action_and_reward(obs, self.deep_q_net.clone().unwrap()).0;
         }
+        self.step += 1;
         let probs = obs.1;
         let prob = probs[action];
         let is_adj = obs.2;

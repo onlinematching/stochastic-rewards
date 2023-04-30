@@ -16,7 +16,7 @@ pub fn run() -> Result<()> {
     let mut epoch = 0;
     loop {
         epoch += 1;
-        if epoch == 200 {
+        if epoch == 2000 {
             break;
         }
         println!("\n epoch = {epoch} -------------------------- ");

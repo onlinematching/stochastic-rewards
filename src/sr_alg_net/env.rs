@@ -20,7 +20,7 @@ pub type Key = usize;
 pub type Load = Prob;
 pub type IsAdj = bool;
 
-pub type ObservationSpace = ([Load; M], [Prob; M], [IsAdj; M]);
+pub type ObservationSpace = ([Load; M], [Prob; M], [IsAdj; M], Step);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
 pub type Space = (Option<ObservationSpace>, Option<ActionSpace>);
