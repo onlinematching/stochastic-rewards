@@ -1,7 +1,7 @@
 use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
 
 use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
-use super::util::{self, bernoulli_trial, sample, deep_q_net_pretransmute};
+use super::util::{self, bernoulli_trial, deep_q_net_pretransmute, sample};
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
@@ -89,6 +89,34 @@ impl AwesomeAlg {
     }
 }
 
+pub fn get_best_action_and_reward(
+    actions: &Vec<ActionSpace>,
+    obs: ObservationSpace,
+    deep_q_net: Arc<dyn Module>,
+) -> (ActionSpace, Reward) {
+    let mut reward: Reward;
+    let spaces = actions
+        .clone()
+        .into_iter()
+        .map(|act: ActionSpace| (obs.clone(), Some(act)))
+        .map(|space: Space| deep_q_net_pretransmute(space))
+        .collect::<Vec<Tensor>>();
+    let rewards: Vec<Reward> = spaces
+        .iter()
+        .map(|space_tensor| deep_q_net.forward(&space_tensor))
+        .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
+        .collect::<Vec<Reward>>();
+    let mut action = ActionSpace::MAX;
+    reward = Reward::MIN;
+    for i in actions.clone().into_iter() {
+        if rewards[i] > reward {
+            reward = rewards[i];
+            action = i;
+        }
+    }
+    return (action, reward);
+}
+
 impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
     fn init(info: AlgInfo) -> Self {
         let (l, net, state) = info;
@@ -115,26 +143,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         if self.state == State::Train && !bernoulli_trial(ALPHA) {
             action = *sample(&actions);
         } else {
-            let mut reward: f64;
-            let spaces = actions
-                .clone()
-                .into_iter()
-                .map(|act: ActionSpace| (obs.clone(), Some(act)))
-                .map(|space: Space| deep_q_net_pretransmute(space))
-                .collect::<Vec<Tensor>>();
-            let rewards: Vec<Reward> = spaces
-                .iter()
-                .map(|space_tensor| self.deep_q_net.clone().unwrap().forward(&space_tensor))
-                .map(|reward_tensor| Vec::<f32>::from(reward_tensor.view(-1))[0] as Reward)
-                .collect::<Vec<Reward>>();
-            action = ActionSpace::MAX;
-            reward = Reward::MIN;
-            for i in actions.clone().into_iter() {
-                if rewards[i] > reward {
-                    reward = rewards[i];
-                    action = i;
-                }
-            }
+            action = get_best_action_and_reward(&actions, obs, self.deep_q_net.clone().unwrap()).0;
         }
         let probs = obs.1;
         let prob = probs[action];

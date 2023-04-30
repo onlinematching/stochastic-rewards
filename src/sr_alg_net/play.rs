@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::sr_alg_net::env::Space;
-use tch::nn::Module;
+use tch::{nn::Module, Tensor};
 
 use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
 
@@ -62,4 +62,12 @@ pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<E
     }
 }
 
-pub fn calculate_loss() {}
+pub fn calculate_loss(
+    state_action_v: Tensor,
+    reward_v: Tensor,
+    next_states_v: Tensor,
+    done_mask: Vec<bool>,
+    net: Arc<dyn Module>,
+) {
+    
+}
