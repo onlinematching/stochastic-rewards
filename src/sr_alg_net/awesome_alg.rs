@@ -98,7 +98,7 @@ pub fn get_best_action_and_reward(
     let spaces = actions
         .clone()
         .into_iter()
-        .map(|act: ActionSpace| (obs.clone(), Some(act)))
+        .map(|act: ActionSpace| (Some(obs.clone()), Some(act)))
         .map(|space: Space| deep_q_net_pretransmute(space))
         .collect::<Vec<Tensor>>();
     let rewards: Vec<Reward> = spaces
@@ -149,6 +149,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         let prob = probs[action];
         let is_adj = obs.2;
         if is_adj[action] {
+            self.offline_nodes_loads[action] += prob;
             Some((action, prob))
         } else {
             None

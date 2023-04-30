@@ -45,9 +45,9 @@ pub fn tensor2actprob(action: &Tensor) -> ActionProbSpace {
 
 pub fn pre_deep_q_net_pretransmute(x: Space) -> Vec<f32> {
     let mut t: Vec<f32> = Vec::new();
-    t.extend(x.0 .0.iter().map(|&a| a as f32));
-    t.extend(x.0 .1.iter().map(|&a| a as f32));
-    t.extend(x.0 .2.map(|a| match a {
+    t.extend(x.0.unwrap().0.iter().map(|&a| a as f32));
+    t.extend(x.0.unwrap().1.iter().map(|&a| a as f32));
+    t.extend(x.0.unwrap().2.map(|a| match a {
         true => 1.,
         false => 0.,
     }));

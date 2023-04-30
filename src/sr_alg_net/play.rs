@@ -16,12 +16,12 @@ pub struct Experience {
     pub action: Option<ActionSpace>,
     pub reward: Reward,
     pub done: bool,
-    pub new_state: ObservationSpace,
+    pub new_state: Option<ObservationSpace>,
 }
 
 impl Experience {
     pub fn get_space(&self) -> Space {
-        (self.state, self.action)
+        (Some(self.state), self.action)
     }
 }
 
@@ -71,23 +71,30 @@ pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<E
         if is_terminated {
             return Some(buffer);
         }
-        state = new_state;
+        state = new_state.unwrap();
     }
 }
 
 pub fn calculate_loss(
     state_action: Vec<Space>,
     reward: Vec<Reward>,
-    next_states: Vec<ObservationSpace>,
+    next_states: Vec<Option<ObservationSpace>>,
     done_mask: Vec<bool>,
     net: Arc<dyn Module>,
 ) -> Tensor {
-    let state_action = Tensor::stack(&state_action
-        .into_iter()
-        .map(deep_q_net_pretransmute)
-        .collect::<Vec<Tensor>>(), 0);
-    let state_action_v = net.forward(&state_action);
+    let state_action = Tensor::stack(
+        &state_action
+            .into_iter()
+            .map(deep_q_net_pretransmute)
+            .collect::<Vec<Tensor>>(),
+        0,
+    );
+    println!("-----------");
+    state_action.print();
 
+    let state_action_v = net.forward(&state_action);
+    println!("-----------");
+    state_action_v.print();
 
     todo!()
 }

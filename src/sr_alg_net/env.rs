@@ -10,6 +10,7 @@ use onlinematching::{
     },
     weightedbigraph::WBigraph,
 };
+use rand::{distributions::Uniform, Rng};
 use std::sync::Arc;
 use tch::nn::Module;
 
@@ -22,7 +23,7 @@ pub type IsAdj = bool;
 pub type ObservationSpace = ([Load; M], [Prob; M], [IsAdj; M]);
 pub type ActionSpace = usize;
 pub type ActionProbSpace = ([Prob; M],);
-pub type Space = (ObservationSpace, Option<ActionSpace>);
+pub type Space = (Option<ObservationSpace>, Option<ActionSpace>);
 
 pub const DEBUG: bool = true;
 pub const PRECISION: usize = 1000;
@@ -43,7 +44,11 @@ impl AdapticeAlgGame {
     }
 
     pub fn generate_random_sr() -> StochasticReward<Key> {
-        onlinematching::papers::stochastic_reward::mp12::example::gk(3, 20)
+        let range = Uniform::new_inclusive(1, 10);
+        let mut rng = rand::thread_rng();
+        let m = rng.sample(range);
+        let m = 1;
+        onlinematching::papers::stochastic_reward::mp12::example::gk(M, m)
     }
 
     fn get_online_adjacent(&self) -> Vec<(usize, Prob)> {
@@ -89,13 +94,17 @@ impl AdapticeAlgGame {
     }
 
     pub fn step(&mut self) -> (Space, Reward, bool) {
-        let online_adj = self.get_online_adjacent();
-        let alg_choose = self.adaptive_alg.dispatch(&online_adj);
-        let obs: ObservationSpace = self.adaptive_alg.get_state(&online_adj);
+        let alg_choose = self.adaptive_alg.dispatch(&self.get_online_adjacent());
         let success = self.adaptive_alg.query_success(alg_choose);
         self.step += 1;
+        let obs: Option<ObservationSpace>;
         let last_step = self.online_graph.weighted_bigraph.v_nodes.len();
         let is_terminated = self.step == last_step;
+        if is_terminated {
+            obs = None;
+        } else {
+            obs = Some(self.adaptive_alg.get_state(&self.get_online_adjacent()));
+        }
         match alg_choose {
             Some((action, _p)) => {
                 let reward: f64 = match success.unwrap() {
