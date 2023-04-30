@@ -85,7 +85,7 @@ impl AdapticeAlgGame {
         self.adaptive_alg.get_state(&adj)
     }
 
-    pub fn step(&mut self) -> (Space, Reward, bool, bool) {
+    pub fn step(&mut self) -> (Space, Reward, bool) {
         let online_adj = self.get_online_adjacent();
         let alg_choose = self.adaptive_alg.dispatch(&online_adj);
         let obs: ObservationSpace = self.adaptive_alg.get_state(&online_adj);
@@ -98,12 +98,18 @@ impl AdapticeAlgGame {
                     false => 0.,
                 };
                 if self.step == M {
-                    ((obs, Some(action)), reward, true, false)
+                    ((obs, Some(action)), reward, true)
                 } else {
-                    ((obs, Some(action)), reward, false, false)
+                    ((obs, Some(action)), reward, false)
                 }
             }
-            None => ((obs, None), 0., false, true),
+            None => {
+                if self.step == M {
+                    ((obs, None), 0., true)
+                } else {
+                    ((obs, None), 0., false)
+                }
+            },
         }
     }
 }

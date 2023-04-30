@@ -1,14 +1,10 @@
-use std::sync::Arc;
-use std::time::Duration;
-
 use crate::sr_alg_net::awesome_alg::{deep_q_net, DEVICE};
 use crate::sr_alg_net::env::AdapticeAlgGame;
 use crate::sr_alg_net::play::play;
-use crate::sr_alg_net::util::obser2tensor;
-use anyhow::{Ok, Result};
-use std::thread;
+use anyhow::Result;
+use std::sync::Arc;
 use tch::nn;
-use tch::nn::{Module, OptimizerConfig};
+use tch::nn::OptimizerConfig;
 use tch::Tensor;
 
 const PERCENTILE: f64 = 0.3;
@@ -23,7 +19,8 @@ pub fn run() -> Result<()> {
     loop {
         epoch += 1;
         if let Some(buffer) = play(&mut game, deep_q_net.clone()) {
-
+            let buffer = buffer.buffer;
+            buffer;
         }
     }
 }

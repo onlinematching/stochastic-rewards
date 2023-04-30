@@ -21,7 +21,7 @@ pub struct Experience {
 
 #[derive(Debug)]
 pub struct ExperienceBuffer {
-    buffer: Vec<Experience>,
+    pub buffer: Vec<Experience>,
 }
 
 impl ExperienceBuffer {
@@ -43,11 +43,8 @@ pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<E
     let mut buffer = ExperienceBuffer::new();
     let mut state: ObservationSpace = game.reset(deep_q_net.clone(), SEED);
     loop {
-        let info: (Space, f64, bool, bool) = game.step();
-        let (space, reward, is_terminated, is_truncated) = info;
-        if is_truncated {
-            return None;
-        }
+        let info: (Space, f64, bool) = game.step();
+        let (space, reward, is_terminated) = info;
         let (new_state, action) = space;
         let exp = Experience {
             state,

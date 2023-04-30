@@ -1,4 +1,7 @@
-use super::env::{ActionProbSpace, ActionSpace, ObservationSpace, Space};
+use super::{
+    env::{ActionProbSpace, ObservationSpace, Space},
+    play::Experience,
+};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
@@ -14,6 +17,10 @@ pub const fn pow2(n: usize) -> usize {
 pub fn bernoulli_trial(p: f64) -> bool {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>() < p
+}
+
+pub fn exp2tensor(exp: Experience) -> Tensor {
+    todo!()
 }
 
 pub fn obser2tensor(obs: ObservationSpace) -> Tensor {
@@ -36,7 +43,7 @@ pub fn tensor2actprob(action: &Tensor) -> ActionProbSpace {
     (action,)
 }
 
-pub fn deep_q_net_pretransmute(x: Space) -> Tensor {
+pub fn pre_deep_q_net_pretransmute(x: Space) -> Vec<f32> {
     let mut t: Vec<f32> = Vec::new();
     t.extend(x.0 .0.iter().map(|&a| a as f32));
     t.extend(x.0 .1.iter().map(|&a| a as f32));
@@ -44,8 +51,15 @@ pub fn deep_q_net_pretransmute(x: Space) -> Tensor {
         true => 1.,
         false => 0.,
     }));
-    t.push(x.1.unwrap() as f32);
-    Tensor::of_slice(&t)
+    match x.1 {
+        Some(act) => t.push(act as f32),
+        None => t.push(-1.),
+    }
+    t
+}
+
+pub fn deep_q_net_pretransmute(x: Space) -> Tensor {
+    Tensor::of_slice(&pre_deep_q_net_pretransmute(x))
 }
 
 pub fn sample<T>(my_vec: &Vec<T>) -> &T {

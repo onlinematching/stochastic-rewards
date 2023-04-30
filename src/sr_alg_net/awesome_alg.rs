@@ -1,7 +1,7 @@
 use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
 
 use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
-use super::util::{self, bernoulli_trial, deep_q_net_pretransmute, sample};
+use super::util::{self, bernoulli_trial, sample, deep_q_net_pretransmute};
 use once_cell::sync::Lazy;
 use onlinematching::papers::adwords::util::get_available_offline_nodes_in_weighted_onlineadj;
 use onlinematching::papers::stochastic_reward::graph::algorithm::AdaptiveAlgorithm;
