@@ -11,10 +11,10 @@ fn main() {
             panic!("{:?}", e)
         }
     };
-    match graph_reinforce::run() {
-        Ok(_) => {}
-        Err(e) => {
-            panic!("{:?}", e)
-        }
-    };
+    // match graph_reinforce::run() {
+    //     Ok(_) => {}
+    //     Err(e) => {
+    //         panic!("{:?}", e)
+    //     }
+    // };
 }

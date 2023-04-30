@@ -1,9 +1,10 @@
 use crate::sr_alg_net::util::deep_q_net_pretransmute;
 use crate::sr_alg_net::{awesome_alg::get_best_action_and_reward, env::Space};
 use std::sync::Arc;
-use tch::{nn, Reduction};
+use tch::Reduction;
 use tch::{nn::Module, Tensor};
 
+use super::awesome_alg::State;
 use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace, DEBUG};
 
 type Reward = f64;
@@ -37,11 +38,6 @@ impl ExperienceBuffer {
         ExperienceBuffer { buffer: Vec::new() }
     }
 
-    #[inline]
-    fn len(&self) -> usize {
-        self.buffer.len()
-    }
-
     fn push(&mut self, exp: Experience) {
         self.buffer.push(exp)
     }
@@ -54,9 +50,13 @@ impl ExperienceBuffer {
     }
 }
 
-pub fn play(game: &mut AdapticeAlgGame, deep_q_net: Arc<dyn Module>) -> Option<ExperienceBuffer> {
+pub fn play(
+    game: &mut AdapticeAlgGame,
+    deep_q_net: Arc<dyn Module>,
+    state: State,
+) -> Option<ExperienceBuffer> {
     let mut buffer = ExperienceBuffer::new();
-    let mut state: ObservationSpace = game.reset(deep_q_net.clone(), SEED);
+    let mut state: ObservationSpace = game.reset(deep_q_net.clone(), state, SEED);
     loop {
         let info: (Space, f64, bool) = game.step();
         let (space, reward, is_terminated) = info;
@@ -96,9 +96,16 @@ pub fn calculate_loss(
         0,
     );
     let state_action_v = net.forward(&state_action);
+    if DEBUG {
+        println!("state_action = ");
+        state_action.print();
+        println!("state_action_v = ");
+        state_action_v.print();
+    }
     // return is discount reward: reward + Gamma * max_Q(s_{n+1}, a)
-    let returns = tch::no_grad(|| {
+    let expected_state_action_v = tch::no_grad(|| {
         let rewards = Tensor::of_slice(&reward.iter().map(|&r| r as f32).collect::<Vec<f32>>());
+        rewards.print();
         let next_states_q_net_return = Tensor::of_slice(
             &next_states
                 .into_iter()
@@ -111,7 +118,10 @@ pub fn calculate_loss(
                 })
                 .collect::<Vec<f32>>(),
         );
+        next_states_q_net_return.print();
         rewards + GAMMA * next_states_q_net_return
     });
-    state_action_v.mse_loss(&returns, Reduction::Mean)
+    println!("expected_state_action_v = ");
+    expected_state_action_v.print();
+    state_action_v.mse_loss(&expected_state_action_v, Reduction::Mean)
 }

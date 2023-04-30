@@ -11,7 +11,7 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-const ALPHA: f64 = 0.9;
+const ALPHA: f64 = 0.8;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum State {

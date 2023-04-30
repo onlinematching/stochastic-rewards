@@ -1,7 +1,7 @@
-use crate::sr_alg_net::awesome_alg::{deep_q_net, DEVICE};
+use crate::sr_alg_net::awesome_alg::{deep_q_net, State, DEVICE};
 use crate::sr_alg_net::env::{AdapticeAlgGame, ObservationSpace, Reward, Space};
 use crate::sr_alg_net::play::{calculate_loss, play, Experience};
-use anyhow::Result;
+use anyhow::{Ok, Result};
 use std::sync::Arc;
 use tch::nn;
 use tch::nn::OptimizerConfig;
@@ -16,15 +16,26 @@ pub fn run() -> Result<()> {
     let mut epoch = 0;
     loop {
         epoch += 1;
-        if let Some(buffer) = play(&mut game, deep_q_net.clone()) {
-            println!("\n epoch = {epoch}");
+        if epoch == 200 {
+            break;
+        }
+        println!("\n epoch = {epoch} -------------------------- ");
+        if let Some(buffer) = play(&mut game, deep_q_net.clone(), State::Train) {
             let spaces: Vec<Space> = buffer.bean(Experience::get_space);
             let rewards: Vec<Reward> = buffer.bean(|exp| exp.reward);
             let next_obs: Vec<Option<ObservationSpace>> = buffer.bean(|exp| exp.new_state);
             println!("buffer = {:?}", buffer);
-            let loss = calculate_loss(spaces, rewards, next_obs, deep_q_net.clone());
-            
-            
+            opt.zero_grad();
+            let loss: Tensor = calculate_loss(spaces, rewards, next_obs, deep_q_net.clone());
+            println!("loss = ");
+            loss.print();
+            opt.backward_step(&loss);
         }
     }
+    println!("test: ---------------------------");
+    println!(
+        "buffer = {:?}",
+        play(&mut game, deep_q_net.clone(), State::Infer)
+    );
+    Ok(())
 }
