@@ -1,6 +1,6 @@
 use crate::sr_alg_net::awesome_alg::{deep_q_net, DEVICE};
-use crate::sr_alg_net::env::AdapticeAlgGame;
-use crate::sr_alg_net::play::play;
+use crate::sr_alg_net::env::{AdapticeAlgGame, ObservationSpace, Reward, Space};
+use crate::sr_alg_net::play::{calculate_loss, play, Experience};
 use anyhow::Result;
 use std::sync::Arc;
 use tch::nn;
@@ -19,8 +19,13 @@ pub fn run() -> Result<()> {
     loop {
         epoch += 1;
         if let Some(buffer) = play(&mut game, deep_q_net.clone()) {
-            let buffer = buffer.buffer;
-            buffer;
+            let spaces: Vec<Space> = buffer.bean(Experience::get_space);
+            let rewards: Vec<Reward> = buffer.bean(|exp| exp.reward);
+            let done: Vec<bool> = buffer.bean(|exp| exp.done);
+            let next_obs: Vec<ObservationSpace> = buffer.bean(|exp| exp.new_state);
+            println!("buffer = {:?}", buffer);
+            let loss = calculate_loss(spaces, rewards, next_obs, done, deep_q_net.clone());
+            
         }
     }
 }

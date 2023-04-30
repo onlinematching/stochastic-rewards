@@ -1,6 +1,6 @@
-use std::sync::Arc;
-
 use crate::sr_alg_net::env::Space;
+use crate::sr_alg_net::util::deep_q_net_pretransmute;
+use std::sync::Arc;
 use tch::{nn::Module, Tensor};
 
 use super::env::{ActionSpace, AdapticeAlgGame, ObservationSpace};
@@ -10,16 +10,22 @@ type Reward = f64;
 const SEED: i64 = 42;
 const LEARNING_RATE: f64 = 0.98;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct Experience {
-    state: ObservationSpace,
-    action: Option<ActionSpace>,
-    reward: Reward,
-    done: bool,
-    new_state: ObservationSpace,
+    pub state: ObservationSpace,
+    pub action: Option<ActionSpace>,
+    pub reward: Reward,
+    pub done: bool,
+    pub new_state: ObservationSpace,
 }
 
-#[derive(Debug)]
+impl Experience {
+    pub fn get_space(&self) -> Space {
+        (self.state, self.action)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct ExperienceBuffer {
     pub buffer: Vec<Experience>,
 }
@@ -36,6 +42,13 @@ impl ExperienceBuffer {
 
     fn push(&mut self, exp: Experience) {
         self.buffer.push(exp)
+    }
+
+    pub fn bean<F, T>(&self, f: F) -> Vec<T>
+    where
+        F: Fn(&Experience) -> T,
+    {
+        self.buffer.iter().map(|exp| f(exp)).collect::<Vec<T>>()
     }
 }
 
@@ -69,5 +82,12 @@ pub fn calculate_loss(
     done_mask: Vec<bool>,
     net: Arc<dyn Module>,
 ) -> Tensor {
+    let state_action = Tensor::stack(&state_action
+        .into_iter()
+        .map(deep_q_net_pretransmute)
+        .collect::<Vec<Tensor>>(), 0);
+    let state_action_v = net.forward(&state_action);
+
+
     todo!()
 }

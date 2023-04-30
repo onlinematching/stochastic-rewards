@@ -139,7 +139,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
     fn dispatch(self: &mut Self, online_adjacent: &Vec<(usize, Prob)>) -> Option<(usize, Prob)> {
         let obs: ObservationSpace = self.get_state(online_adjacent);
         let actions = (0..M).collect::<Vec<ActionSpace>>();
-        let mut action: usize;
+        let action: usize;
         if self.state == State::Train && !bernoulli_trial(ALPHA) {
             action = *sample(&actions);
         } else {
