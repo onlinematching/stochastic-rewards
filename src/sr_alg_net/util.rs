@@ -1,7 +1,4 @@
-use super::{
-    env::{ActionProbSpace, ObservationSpace, Space},
-    play::Experience,
-};
+use super::env::{ActionProbSpace, ObservationSpace, Space};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
 use onlinematching::papers::stochastic_reward::graph::Prob;
@@ -17,10 +14,6 @@ pub const fn pow2(n: usize) -> usize {
 pub fn bernoulli_trial(p: f64) -> bool {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>() < p
-}
-
-pub fn exp2tensor(exp: Experience) -> Tensor {
-    todo!()
 }
 
 pub fn obser2tensor(obs: ObservationSpace) -> Tensor {

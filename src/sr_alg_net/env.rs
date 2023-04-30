@@ -82,7 +82,7 @@ impl AdapticeAlgGame {
 
 impl AdapticeAlgGame {
     pub fn reset(&mut self, deep_q_net: Arc<dyn Module>, _seed: i64) -> ObservationSpace {
-        let graph = Self::generate_random_sr();
+        let graph: StochasticReward<Key> = Self::generate_random_sr();
         if DEBUG {
             println!("random_sr graph = {:?}", graph)
         }

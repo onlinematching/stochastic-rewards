@@ -1,5 +1,3 @@
-use crate::sr_alg_net::util::{sample_from_softmax, tensor2actprob};
-
 use super::env::{ActionSpace, IsAdj, Load, ObservationSpace, Reward, Space};
 use super::util::{self, bernoulli_trial, deep_q_net_pretransmute, sample};
 use once_cell::sync::Lazy;
@@ -13,7 +11,6 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-const GAMMA: f64 = 1. - 1. / M as f64;
 const ALPHA: f64 = 0.9;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -90,10 +87,10 @@ impl AwesomeAlg {
 }
 
 pub fn get_best_action_and_reward(
-    actions: &Vec<ActionSpace>,
     obs: ObservationSpace,
     deep_q_net: Arc<dyn Module>,
 ) -> (ActionSpace, Reward) {
+    let actions = (0..M).collect::<Vec<ActionSpace>>();
     let mut reward: Reward;
     let spaces = actions
         .clone()
@@ -143,7 +140,7 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         if self.state == State::Train && !bernoulli_trial(ALPHA) {
             action = *sample(&actions);
         } else {
-            action = get_best_action_and_reward(&actions, obs, self.deep_q_net.clone().unwrap()).0;
+            action = get_best_action_and_reward(obs, self.deep_q_net.clone().unwrap()).0;
         }
         let probs = obs.1;
         let prob = probs[action];
