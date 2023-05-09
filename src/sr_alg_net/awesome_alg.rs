@@ -11,7 +11,7 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-const ALPHA: f64 = 0.9;
+const ALPHA: f64 = 0.6;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum State {
@@ -30,6 +30,14 @@ pub fn deep_q_net(vs: &nn::Path) -> impl Module {
             vs / "layer1",
             // Observation Spave dim + Action Space dim
             (3 * M + 1 + 1) as i64,
+            HIDDEN_LAYER * 2,
+            Default::default(),
+        ))
+        .add_fn(|xs| xs.relu())
+        .add(nn::linear(
+            vs / "layer1",
+            // Observation Spave dim + Action Space dim
+            HIDDEN_LAYER * 2,
             HIDDEN_LAYER,
             Default::default(),
         ))

@@ -7,7 +7,7 @@ use tch::nn;
 use tch::nn::OptimizerConfig;
 use tch::Tensor;
 
-const T: usize = 10000;
+const T: usize = 300;
 
 pub fn run(batch_size: usize) -> Result<()> {
     let mut game: AdapticeAlgGame = AdapticeAlgGame::new();
@@ -22,11 +22,11 @@ pub fn run(batch_size: usize) -> Result<()> {
         if epoch == T * batch_size {
             break;
         }
-        // println!("\n epoch = {epoch} -------------------------- ");
         if let Some(buffer) = play(&mut game, deep_q_net.clone(), State::Train) {
             buffers.buffer.extend(&buffer.buffer)
         }
         if epoch % batch_size == 0 {
+            println!("\n epoch = {epoch} -------------------------- ");
             let spaces: Vec<Space> = buffers.bean(Experience::get_space);
             let rewards: Vec<Reward> = buffers.bean(|exp| exp.reward);
             let next_obs: Vec<Option<ObservationSpace>> = buffers.bean(|exp| exp.new_state);
