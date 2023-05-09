@@ -34,7 +34,7 @@ pub struct ExperienceBuffer {
 }
 
 impl ExperienceBuffer {
-    fn new() -> Self {
+    pub fn new() -> Self {
         ExperienceBuffer { buffer: Vec::new() }
     }
 
@@ -96,16 +96,16 @@ pub fn calculate_loss(
         0,
     );
     let state_action_v = net.forward(&state_action);
-    if DEBUG {
-        println!("state_action = ");
-        state_action.print();
-        println!("state_action_v = ");
-        state_action_v.print();
-    }
+    // if DEBUG {
+    //     println!("state_action = ");
+    //     state_action.print();
+    //     println!("state_action_v = ");
+    //     state_action_v.print();
+    // }
     // return is discount reward: reward + Gamma * max_Q(s_{n+1}, a)
     let expected_state_action_v = tch::no_grad(|| {
         let rewards = Tensor::of_slice(&reward.iter().map(|&r| r as f32).collect::<Vec<f32>>());
-        rewards.print();
+        // rewards.print();
         let next_states_q_net_return = Tensor::of_slice(
             &next_states
                 .into_iter()
@@ -118,10 +118,10 @@ pub fn calculate_loss(
                 })
                 .collect::<Vec<f32>>(),
         );
-        next_states_q_net_return.print();
+        // next_states_q_net_return.print();
         rewards + GAMMA * next_states_q_net_return
     });
-    println!("expected_state_action_v = ");
-    expected_state_action_v.print();
+    // println!("expected_state_action_v = ");
+    // expected_state_action_v.print();
     state_action_v.mse_loss(&expected_state_action_v, Reduction::Mean)
 }

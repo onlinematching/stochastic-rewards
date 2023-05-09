@@ -83,9 +83,9 @@ impl AdapticeAlgGame {
 impl AdapticeAlgGame {
     pub fn reset(&mut self, deep_q_net: Arc<dyn Module>, state: State, _seed: i64) -> ObservationSpace {
         let graph: StochasticReward<Key> = Self::generate_random_sr();
-        if DEBUG {
-            println!("random_sr graph = {:?}", graph)
-        }
+        // if DEBUG {
+        //     println!("random_sr graph = {:?}", graph)
+        // }
         self.online_graph = graph;
         self.step = Step::default();
         self.adaptive_alg = AwesomeAlg::init((M, Some(deep_q_net), state));

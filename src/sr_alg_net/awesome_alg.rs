@@ -11,7 +11,7 @@ use tch::Device;
 use tch::{nn, Tensor};
 
 const M: usize = util::M;
-const ALPHA: f64 = 0.93;
+const ALPHA: f64 = 0.9;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum State {
@@ -132,7 +132,8 @@ impl AdaptiveAlgorithm<(usize, Prob), AlgInfo> for AwesomeAlg {
         let obs: ObservationSpace = self.get_state(online_adjacent);
         let actions = (0..M).collect::<Vec<ActionSpace>>();
         let action: usize;
-        if self.state == State::Train && !bernoulli_trial(ALPHA) {
+        if self.state == State::Train && bernoulli_trial(ALPHA) {
+            // println!("bernoulli {:?}", self.step);
             action = *sample(&actions);
         } else {
             action = get_best_action_and_reward(obs, self.deep_q_net.clone().unwrap()).0;

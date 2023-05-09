@@ -5,7 +5,7 @@ mod sr_graph_net;
 
 fn main() {
     println!("{:?}", *graph_reinforce::DEVICE.lock().unwrap());
-    match alg_reinforce::run() {
+    match alg_reinforce::run(16) {
         Ok(_) => {}
         Err(e) => {
             panic!("{:?}", e)
