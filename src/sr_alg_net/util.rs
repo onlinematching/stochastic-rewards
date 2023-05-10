@@ -1,11 +1,13 @@
+use std::collections::HashMap;
+
 use super::env::{ActionProbSpace, ObservationSpace, Space};
 use ndarray::Array;
 use ndarray_rand::rand_distr::{Distribution, Uniform};
-use onlinematching::papers::stochastic_reward::graph::Prob;
+use onlinematching::{papers::stochastic_reward::graph::Prob, weightedbigraph::WBigraph};
 use rand::{thread_rng, Rng};
 use tch::Tensor;
 
-pub const M: usize = 3;
+pub const M: usize = 1;
 
 pub const fn pow2(n: usize) -> usize {
     1 << n
@@ -14,6 +16,17 @@ pub const fn pow2(n: usize) -> usize {
 pub fn bernoulli_trial(p: f64) -> bool {
     let mut rng = rand::thread_rng();
     rng.gen::<f64>() < p
+}
+
+pub fn generate_worst_g() -> WBigraph<usize, Prob> {
+    let edges;
+    match M {
+        1 => {
+            edges = vec![((0, 0), 1.)];
+            WBigraph::from_edges(&edges)
+        }
+        _ => panic!(),
+    }
 }
 
 pub fn obser2tensor(obs: ObservationSpace) -> Tensor {

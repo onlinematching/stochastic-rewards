@@ -44,10 +44,10 @@ impl AdapticeAlgGame {
     }
 
     pub fn generate_random_sr() -> StochasticReward<Key> {
-        let range = Uniform::new_inclusive(1, 10);
-        let mut rng = rand::thread_rng();
-        let m = rng.sample(range);
-        let m = 1;
+        // let range = Uniform::new_inclusive(1, 10);
+        // let mut rng = rand::thread_rng();
+        // let m = rng.sample(range);
+        let m = 20;
         onlinematching::papers::stochastic_reward::mp12::example::gk(M, m)
     }
 
