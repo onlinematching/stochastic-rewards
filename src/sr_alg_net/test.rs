@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod test {
-    use onlinematching::{weightedbigraph::WBigraph, papers::stochastic_reward::mp12};
+    use onlinematching::{papers::stochastic_reward::mp12, weightedbigraph::WBigraph};
 
-    use crate::sr_alg_net::util::{M, from_nonweight_edges, generate_worst_edges};
     use crate::sr_alg_net::uni_test;
+    use crate::sr_alg_net::util::{from_nonweight_edges, generate_worst_edges, pow2, M};
 
     #[test]
     fn test1() {
@@ -12,8 +12,14 @@ mod test {
 
     #[test]
     fn test_balance_graph() {
-        uni_test::unitest_balance_graph(200)
+        let mut rs = vec![];
+        let n = 5;
+        for i in 0..n {
+            let m = pow2(i);
+            let r = uni_test::unitest_balance_graph(m);
+            rs.push(r)
+        }
+        let s: f64 = rs.iter().sum();
+        println!("{:?}, mean = {:?}", rs, s / n as f64)
     }
-
 }
-
