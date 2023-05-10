@@ -7,7 +7,7 @@ use onlinematching::{papers::stochastic_reward::graph::Prob, weightedbigraph::WB
 use rand::{thread_rng, Rng};
 use tch::Tensor;
 
-pub const M: usize = 1;
+pub const M: usize = 4;
 
 pub const fn pow2(n: usize) -> usize {
     1 << n
@@ -18,15 +18,54 @@ pub fn bernoulli_trial(p: f64) -> bool {
     rng.gen::<f64>() < p
 }
 
-pub fn generate_worst_g() -> WBigraph<usize, Prob> {
-    let edges;
+pub fn generate_worst_edges() -> Vec<(usize, usize)> {
     match M {
         1 => {
-            edges = vec![((0, 0), 1.)];
-            WBigraph::from_edges(&edges)
+            vec![(0, 0)]
+        }
+        2 => {
+            vec![(0, 0), (1, 0), (1, 1)]
+        }
+        3 => {
+            vec![(0, 0), (1, 0), (2, 0), (1, 1), (2, 2)]
+        }
+        4 => {
+            //
+            // u_adj: [[0], [0, 1], [0, 2], [0, 3]], v_adj: [[0, 1, 2, 3], [1], [2], [3]]
+            vec![(0, 0), (1, 0), (1, 1), (2, 0), (2, 2), (3, 0), (3, 3)]
+        }
+        5 => {
+            // u_adj: [[0, 1, 3], [0, 1, 4], [0, 1], [0], [0, 1, 2]],
+            // v_adj: [[0, 1, 2, 3, 4], [0, 1, 2, 4], [4], [0], [1]]
+            vec![
+                (0, 0),
+                (0, 1),
+                (1, 3),
+                (1, 0),
+                (1, 1),
+                (1, 4),
+                (2, 0),
+                (2, 1),
+                (3, 0),
+                (4, 0),
+                (4, 1),
+                (4, 2),
+            ]
         }
         _ => panic!(),
     }
+}
+
+pub fn from_nonweight_edges(edges: &Vec<(usize, usize)>, m: usize) -> WBigraph<usize, f64> {
+    let p = 1. / m as f64;
+    let mut w_edges = Vec::new();
+    for edge in edges {
+        let (u, v) = *edge;
+        for vi in (v * m)..((v + 1) * m) {
+            w_edges.push(((u, vi), p))
+        }
+    }
+    WBigraph::from_edges(&w_edges)
 }
 
 pub fn obser2tensor(obs: ObservationSpace) -> Tensor {
