@@ -13,7 +13,7 @@ mod test {
     #[test]
     fn test_balance_graph() {
         let mut rs = vec![];
-        let n = 5;
+        let n = 7;
         for i in 0..n {
             let m = pow2(i);
             let r = uni_test::unitest_balance_graph(m);
