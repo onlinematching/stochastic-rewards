@@ -7,7 +7,7 @@ use tch::nn;
 use tch::nn::OptimizerConfig;
 use tch::Tensor;
 
-const T: usize = 300;
+const T: usize = 100;
 
 pub fn run(batch_size: usize) -> Result<()> {
     let mut game: AdapticeAlgGame = AdapticeAlgGame::new();

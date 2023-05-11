@@ -10,7 +10,6 @@ pub fn unitest_balance_graph(m: usize) -> f64 {
 
     let sr = g.into_stochastic_reward();
     let opt = sr.OPT();
-    // let alg = sr.adaptive_ALG::<Ranking>(t);
     let alg = sr.adaptive_ALG::<mp12::Balance>(t);
     let ratio = alg / opt;
     println!("opt = {:?}, alg = {:?}, ratio = {:?}", opt, alg, ratio);

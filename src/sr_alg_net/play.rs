@@ -55,6 +55,9 @@ pub fn play(
     deep_q_net: Arc<dyn Module>,
     state: State,
 ) -> Option<ExperienceBuffer> {
+    if state == State::Infer {
+        println!("alg = {}", game.get_alg())
+    }
     let mut buffer = ExperienceBuffer::new();
     let mut state: ObservationSpace = game.reset(deep_q_net.clone(), state, SEED);
     loop {

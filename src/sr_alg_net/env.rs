@@ -64,7 +64,7 @@ impl AdapticeAlgGame {
         (alg_ranking * alg_balance).sqrt()
     }
 
-    fn get_alg(&self) -> f64 {
+    pub fn get_alg(&self) -> f64 {
         let mut alg_sum: f64 = 0.;
         let net: Option<Arc<dyn Module>> = self.adaptive_alg.deep_q_net.clone();
         for _ in 0..PRECISION {
