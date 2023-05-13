@@ -3,7 +3,6 @@ import functools
 import sys
 import itertools
 import math
-from graph_helper import Nodes, Edges, graph_helper
 sys.setrecursionlimit(10000)
 
 # u = {0, 1, 2, ..., u_count - 1}
@@ -12,9 +11,9 @@ sys.setrecursionlimit(10000)
 
 
 class Graph:
-    def __init__(self, edges: Edges):
-        self.U: Nodes = []
-        self.V: Nodes = []
+    def __init__(self, edges):
+        self.U = []
+        self.V = []
         self.edges: Edges = []
         for u, v in edges:
             assert (u, v) not in self.edges
@@ -69,35 +68,6 @@ def G(n: int) -> Graph:
 def main():
     g = G(1)
     print(g.expected_success())
-    g = Graph([
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (0, 1),
-        (1, 1),
-        (2, 1),
-        (3, 1),
-        (2, 2),
-        (3, 2),
-        (3, 3)
-    ])
-    
-    g = Graph([
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (0, 1),
-        (1, 1),
-        (2, 1),
-        (3, 1),
-        (2, 2),
-        (3, 2),
-        (2, 3),
-        (3, 3)
-    ])
-
 
 if __name__ == "__main__":
     main()
