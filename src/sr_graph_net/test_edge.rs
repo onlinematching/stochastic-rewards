@@ -1,7 +1,98 @@
+pub mod uni_test {
+    use std::collections::HashMap;
+
+    use crate::sr_graph_net::bisrgraph::BiSRGraph;
+
+    pub fn uni_test_opt() {
+        let edges = vec![
+            (0, 0),
+            (1, 0),
+            (2, 0),
+            (3, 0),
+            (4, 0),
+            (5, 0),
+            (6, 0),
+            (7, 0),
+            (8, 0),
+            (9, 0),
+            (10, 0),
+            (11, 0),
+            (1, 1),
+            (2, 1),
+            (3, 1),
+            (4, 1),
+            (5, 1),
+            (6, 1),
+            (7, 1),
+            (8, 1),
+            (9, 1),
+            (10, 1),
+            (11, 1),
+            (2, 2),
+            (3, 2),
+            (4, 2),
+            (5, 2),
+            (6, 2),
+            (7, 2),
+            (8, 2),
+            (9, 2),
+            (10, 2),
+            (11, 2),
+            (3, 3),
+            (4, 3),
+            (5, 3),
+            (6, 3),
+            (7, 3),
+            (8, 3),
+            (9, 3),
+            (10, 3),
+            (4, 4),
+            (5, 5),
+            (6, 6),
+            (7, 7),
+            (8, 8),
+            (9, 9),
+            (10, 10),
+            (11, 11),
+        ];
+
+        let v_weight = HashMap::from([
+            (0, 1.00),
+            (1, 1.00),
+            (2, 1.00),
+            (3, 1.00),
+            (4, 1.00),
+            (5, 1.00),
+            (6, 1.00),
+            (7, 1.00),
+            (8, 1.00),
+            (9, 1.00),
+            (10, 1.00),
+            (11, 1.00),
+        ]);
+        let mut opt = 0.;
+        for (_, o) in &v_weight {
+            opt += o;
+        }
+        let g = BiSRGraph::from_edge(edges, v_weight);
+
+        println!("{:?}", g);
+
+        println!("opt = {:?}, ALG = {:?}", opt, g.ALG() / opt);
+    }
+}
+
 #[cfg(test)]
 mod tests_edge {
     use crate::sr_graph_net::bisrgraph::BiSRGraph;
     use std::collections::HashMap;
+
+    use super::uni_test::uni_test_opt;
+
+    #[test]
+    fn test_opt() {
+        uni_test_opt();
+    }
 
     #[test]
     fn test1() {

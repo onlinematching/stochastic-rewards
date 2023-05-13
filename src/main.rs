@@ -1,4 +1,5 @@
-use sr_alg_net::uni_test;
+use sr_alg_net::uni_test::{self, unitest_balance_graph};
+use sr_graph_net::test_edge::uni_test::uni_test_opt;
 use crate::sr_alg_net::util::pow2;
 mod alg_reinforce;
 mod graph_reinforce;

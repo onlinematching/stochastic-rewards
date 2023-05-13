@@ -7,7 +7,7 @@ use onlinematching::{papers::stochastic_reward::graph::Prob, weightedbigraph::WB
 use rand::{thread_rng, Rng};
 use tch::Tensor;
 
-pub const M: usize = 4;
+pub const M: usize = 6;
 
 pub const fn pow2(n: usize) -> usize {
     1 << n
@@ -75,6 +75,20 @@ pub fn generate_worst_edges() -> Vec<(usize, usize)> {
         }
         _ => panic!(),
     }
+}
+
+
+pub fn from_nonweight_edges_diff_p(edges: &Vec<(usize, usize)>) -> WBigraph<usize, f64> {
+    let mut w_edges = Vec::new();
+    for edge in edges {
+        let (u, v) = *edge;
+        
+        let p = 1. / m as f64;
+        for vi in (v * m)..((v + 1) * m) {
+            w_edges.push(((u, vi), p))
+        }
+    }
+    WBigraph::from_edges(&w_edges)
 }
 
 pub fn from_nonweight_edges(edges: &Vec<(usize, usize)>, m: usize) -> WBigraph<usize, f64> {
