@@ -14,7 +14,7 @@ class Graph:
     def __init__(self, edges):
         self.U = []
         self.V = []
-        self.edges: Edges = []
+        self.edges = []
         for u, v in edges:
             assert (u, v) not in self.edges
             self.edges.append((u, v))
