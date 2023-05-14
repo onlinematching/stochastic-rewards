@@ -78,11 +78,13 @@ pub fn generate_worst_edges() -> Vec<(usize, usize)> {
 }
 
 
-pub fn from_nonweight_edges_diff_p(edges: &Vec<(usize, usize)>) -> WBigraph<usize, f64> {
+pub fn from_nonweight_edges_diff_p(edges: &Vec<(usize, usize)>, m:usize) -> WBigraph<usize, f64> {
     let mut w_edges = Vec::new();
+    let mut rng = rand::thread_rng();
+    let d = Uniform::from(1..m);
     for edge in edges {
+        let m = d.sample(&mut rng);
         let (u, v) = *edge;
-        
         let p = 1. / m as f64;
         for vi in (v * m)..((v + 1) * m) {
             w_edges.push(((u, vi), p))
