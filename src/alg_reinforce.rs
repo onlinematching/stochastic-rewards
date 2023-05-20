@@ -28,7 +28,7 @@ pub fn run(batch_size: usize) -> Result<()> {
         if epoch % batch_size == 0 {
             println!("\n epoch = {epoch} -------------------------- ");
             let spaces: Vec<Space> = buffers.bean(Experience::get_space);
-            let rewards: Vec<Reward> = buffers.bean(|exp| exp.reward);
+            let rewards: Vec<Reward> = buffers.bean(|exp: &Experience| exp.reward);
             let next_obs: Vec<Option<ObservationSpace>> = buffers.bean(|exp| exp.new_state);
             // println!("buffer = {:?}", buffer);
             opt.zero_grad();

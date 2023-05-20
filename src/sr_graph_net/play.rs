@@ -58,7 +58,7 @@ pub mod play {
             let mut next_obs = env.step(&act_sample);
             let obs_value = next_obs.0;
             let reward = next_obs.1;
-            if abs(reward - 0.60367435) < 0.000001 {
+            if abs(reward - 0.690256598312265) < 0.000001 {
                 get_debug_graph(&obs_value);
                 std::process::abort();
             }

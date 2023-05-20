@@ -9,7 +9,7 @@ use ndarray_rand::rand_distr::Uniform;
 use rand::prelude::*;
 use std::collections::HashMap;
 
-pub const M: usize = 3;
+pub const M: usize = 6;
 
 type Index = usize;
 type Weight = f64;

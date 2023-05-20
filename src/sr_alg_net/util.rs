@@ -18,6 +18,16 @@ pub fn bernoulli_trial(p: f64) -> bool {
     rng.gen::<f64>() < p
 }
 
+pub fn thick_z_edges_generator() -> Vec<(usize, usize)> {
+    let mut ans = Vec::new();
+    for u in 0..M {
+        for v in 0..u {
+            ans.push((u, v))
+        }
+    }
+    ans
+}
+
 pub fn generate_worst_edges() -> Vec<(usize, usize)> {
     match M {
         1 => {
