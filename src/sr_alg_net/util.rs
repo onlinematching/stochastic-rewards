@@ -19,6 +19,27 @@ pub fn bernoulli_trial(p: f64) -> bool {
 }
 
 pub fn thick_z_edges_generator() -> Vec<(usize, usize)> {
+    assert_eq!(M, 6);
+    vec![
+        (0, 0),
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (3, 1),
+        (4, 1),
+        (5, 1),
+        (3, 2),
+        (4, 2),
+        (5, 2),
+    ]
+}
+
+pub fn triangular_g_edges_generator() -> Vec<(usize, usize)> {
     let mut ans = Vec::new();
     for u in 0..M {
         for v in 0..u {
@@ -87,8 +108,7 @@ pub fn generate_worst_edges() -> Vec<(usize, usize)> {
     }
 }
 
-
-pub fn from_nonweight_edges_diff_p(edges: &Vec<(usize, usize)>, m:usize) -> WBigraph<usize, f64> {
+pub fn from_nonweight_edges_diff_p(edges: &Vec<(usize, usize)>, m: usize) -> WBigraph<usize, f64> {
     let mut w_edges = Vec::new();
     let mut rng = rand::thread_rng();
     let d = Uniform::from(1..m);
