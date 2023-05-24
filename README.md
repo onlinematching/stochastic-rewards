@@ -6,7 +6,7 @@ This model is more practical to the online advertising platform, where payments 
 The click-through-rate can be used as an estimation of the probability of those clicks.
 Only when the user actually clicks the ad, which is dominated by a stochastic process, the advertiser should pay for it.
 The randomness coming from the problem itself brings remarkable challenges in theoretical analysis.
-While an optimal $$1-1/e \approx 0.632$$-competitive algorithm is known to OBM, OMSR remains open: an upper bound of 0.621 Meaning that OBSR is strictly harder than OBM.
+While an optimal $1-1/e \approx 0.632$-competitive algorithm is known to OBM, OMSR remains open: an upper bound of 0.621 Meaning that OBSR is strictly harder than OBM.
 
 Our paper studies OMSR and considers both sides of learning robust algorithms and hard instances.
 We set up an adversarial reinforcement learning framework for OMSR.
@@ -14,10 +14,10 @@ The framework consists of an iterative process between an adversary agent _adv_ 
 Compared to most previous work, our framework can not only learn a high-performance algorithm at the very last, but more importantly, learn theoretically provable hardness results for OMSR during the iterative processes as well.
 We conclude our main results as follows:
 
-- For hardness results, we prove that there is no algorithm for OMSR with a competitive ratio of more than $$0.597$$, inspired by a family of instances learned by _adv_.
+- For hardness results, we prove that there is no algorithm for OMSR with a competitive ratio of more than $0.597$, inspired by a family of instances learned by _adv_.
 - For designing algorithms, we empirically show that our algorithms learned by _alg_ performs better than the state-of-the-art (SOTA) algorithm, Balance.
 
-We finally evaluate our framework on a well-studied problem, AdWords , for which an optimal $$(1-1/e)$$-competitive algorithm has been known.
+We finally evaluate our framework on a well-studied problem, AdWords , for which an optimal $(1-1/e)$-competitive algorithm has been known.
 Experimental results validate that our framework can converge to an optimal in the end.
 
 ## installation guide
