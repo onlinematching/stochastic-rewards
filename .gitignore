@@ -9,3 +9,5 @@
 #/target
 /learn torch
 /tmp
+libtorch-cxx11-abi-shared-with-deps-*+cpu.zip
+libtorch/

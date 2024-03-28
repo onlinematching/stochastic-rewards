@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod test {
+pub mod test {
     use onlinematching::{papers::stochastic_reward::mp12, weightedbigraph::WBigraph};
 
     use crate::sr_alg_net::uni_test;
@@ -21,5 +21,13 @@ mod test {
         }
         let s: f64 = rs.iter().sum();
         println!("{:?}, mean = {:?}", rs, s / n as f64)
+    }
+
+    #[test]
+    pub fn test_my_graph() {
+        let n = 6;
+        let m = pow2(n);
+        let r = uni_test::unitest_balance_graph(m);
+        println!("{:?}", r);
     }
 }
