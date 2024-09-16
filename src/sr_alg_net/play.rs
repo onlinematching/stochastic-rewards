@@ -50,6 +50,10 @@ impl ExperienceBuffer {
     }
 }
 
+pub fn play_other_graphs() {
+
+}
+
 pub fn play(
     game: &mut AdapticeAlgGame,
     deep_q_net: Arc<dyn Module>,

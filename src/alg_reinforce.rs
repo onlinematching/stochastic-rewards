@@ -11,7 +11,7 @@ const T: usize = 100;
 
 pub fn run(batch_size: usize) -> Result<()> {
     let mut game: AdapticeAlgGame = AdapticeAlgGame::new();
-    let vs: nn::VarStore = nn::VarStore::new(*DEVICE.lock().unwrap());
+    let mut vs: nn::VarStore = nn::VarStore::new(*DEVICE.lock().unwrap());
     let vs_ref_binding: nn::Path = vs.root();
     let deep_q_net = Arc::new(deep_q_net(&vs_ref_binding));
     let mut opt: nn::Optimizer = nn::Adam::default().build(&vs, 1e-3)?;
@@ -39,7 +39,10 @@ pub fn run(batch_size: usize) -> Result<()> {
             buffers.buffer.clear();
         }
     }
+    vs.save("awesome.safetensors")?;
+
     println!("test: ---------------------------");
+
     println!(
         "buffer = {:?}",
         play(&mut game, deep_q_net.clone(), State::Infer)

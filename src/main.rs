@@ -13,16 +13,16 @@ fn main() {
     let m = pow2(n);
     let r = uni_test::unitest_balance_graph_b(m);
     println!("{:?}", r);
-    // match alg_reinforce::run(16) {
-    //     Ok(_) => {}
-    //     Err(e) => {
-    //         panic!("{:?}", e)
-    //     }
-    // };
-    // match graph_reinforce::run() {
-    //     Ok(_) => {}
-    //     Err(e) => {
-    //         panic!("{:?}", e)
-    //     }
-    // };
+    match alg_reinforce::run(16) {
+        Ok(_) => {}
+        Err(e) => {
+            panic!("{:?}", e)
+        }
+    };
+    match graph_reinforce::run() {
+        Ok(_) => {}
+        Err(e) => {
+            panic!("{:?}", e)
+        }
+    };
 }

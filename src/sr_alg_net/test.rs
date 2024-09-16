@@ -16,7 +16,7 @@ pub mod test {
         let n = 7;
         for i in 0..n {
             let m = pow2(i);
-            let r = uni_test::unitest_balance_graph(m);
+            let r = uni_test::unitest_unequal_balance_graph(m);
             rs.push(r)
         }
         let s: f64 = rs.iter().sum();
